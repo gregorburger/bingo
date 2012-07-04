@@ -1,42 +1,51 @@
-import QtQuick 1.1
+import QtQuick 1.0
 
-Rectangle {
-    id: root_rectangle
-    //color: "#8e8ed7"
+Flipable {
+    id: main
     width: mainwindow.width_
     height: mainwindow.height_
-    
-    Text {
-        width: 400
-        height: parent.height
-        color: "green"
-        text: mainwindow.last_number
-        font.family: "Helveticy"
-        font.pixelSize: parent.height - 30
-        anchors.centerIn: parent
-        horizontalAlignment: Text.AlignHCenter
-        verticalAlignment: Text.AlignVCenter
+    property bool flipped: false
+
+    front: Front {
+        anchors.fill: parent
     }
-    
-    Rectangle {
-        //border.color: "black"
-        //border.width: 2
-        width: 40
-        height: parent.height
-        anchors.left: parent.left
-        ListView {
-            anchors.fill: parent
-            model: mainwindow.old_numbers
-            delegate: Text {
-                font.pixelSize: 30
-                color: "red"
-                width: parent.width
-                height: 35
-                text: modelData
-                horizontalAlignment: Text.AlignHCenter
-                verticalAlignment: Text.AlignVCenter
-            }
+
+    back: Image {
+        source: "qrc:/imgs/back.png"
+        anchors.fill: parent
+        smooth: false
+        fillMode: Image.PreserveAspectFit
+    }
+
+    transform: Rotation {
+        id: rotation
+        origin.x: main.width/2
+        origin.y: main.height/2
+        axis.x: 0; axis.y: 1; axis.z: 0     // set axis.y to 1 to rotate around y-axis
+        angle: 0    // the default angle
+    }
+
+
+
+    states: State {
+        name: "back"
+        PropertyChanges { target: rotation; angle: 180 }
+        when: main.flipped
+    }
+
+    transitions: Transition {
+        NumberAnimation { target: rotation; property: "angle"; duration: 1000 }
+    }
+
+    MouseArea {
+        anchors.fill: parent
+        onClicked: main.flipped = !main.flipped
+    }
+
+    focus: true
+    Keys.onPressed: {
+        if (event.key == Qt.Key_B) {
+            main.flipped = !main.flipped
         }
     }
 }
-

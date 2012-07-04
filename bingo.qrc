@@ -2,4 +2,8 @@
     <qresource prefix="/qml">
         <file>mainview.qml</file>
     </qresource>
+    <qresource prefix="/imgs">
+        <file>back.svg</file>
+        <file>back.png</file>
+    </qresource>
 </RCC>

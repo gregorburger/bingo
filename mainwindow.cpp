@@ -15,7 +15,7 @@ MainWindow::MainWindow(QWidget *parent) :
     context = ui->declarativeView->rootContext();
     context->setContextProperty("mainwindow", this);
     
-    ui->declarativeView->setSource(QUrl("qrc:/qml/mainview.qml"));
+    ui->declarativeView->setSource(QUrl("mainview.qml"));
     addAction(ui->actionFullscreen);
 }
 

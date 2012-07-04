@@ -20,7 +20,8 @@ HEADERS  += mainwindow.h
 FORMS    += mainwindow.ui
 
 OTHER_FILES += \
-    mainview.qml
+    mainview.qml \
+    Front.qml
 
 RESOURCES += \
     bingo.qrc
