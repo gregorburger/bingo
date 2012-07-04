@@ -10,7 +10,7 @@ Rectangle {
         color: "green"
         text: mainwindow.last_number
         font.family: "Helveticy"
-        font.pixelSize: parent.height - 30
+        font.pixelSize: root_rectangle.height - 30
         anchors.centerIn: parent
         horizontalAlignment: Text.AlignHCenter
         verticalAlignment: Text.AlignVCenter
@@ -19,20 +19,27 @@ Rectangle {
     Rectangle {
         //border.color: "black"
         //border.width: 2
-        width: 40
+        width: root_rectangle.height/10
         height: parent.height
-        anchors.left: parent.left
+        x: 2
+        y: 2
         ListView {
             anchors.fill: parent
             model: mainwindow.old_numbers
-            delegate: Text {
-                font.pixelSize: 30
-                color: "red"
+            delegate: Rectangle {
                 width: parent.width
-                height: 35
-                text: modelData
-                horizontalAlignment: Text.AlignHCenter
-                verticalAlignment: Text.AlignVCenter
+                height: root_rectangle.height/10
+                border.color: "green"
+                border.width: 4
+                radius: 10
+                Text {
+                    font.pixelSize: root_rectangle.height/12
+                    color: "red"
+                    anchors.fill: parent
+                    text: modelData
+                    horizontalAlignment: Text.AlignHCenter
+                    verticalAlignment: Text.AlignVCenter
+                }
             }
         }
     }
