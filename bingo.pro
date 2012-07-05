@@ -21,7 +21,8 @@ FORMS    += mainwindow.ui
 
 OTHER_FILES += \
     mainview.qml \
-    Front.qml
+    Front.qml \
+    Countdown.qml
 
 RESOURCES += \
     bingo.qrc

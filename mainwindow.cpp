@@ -17,6 +17,7 @@ MainWindow::MainWindow(QWidget *parent) :
     
     ui->declarativeView->setSource(QUrl("mainview.qml"));
     addAction(ui->actionFullscreen);
+    QObject::connect(&countDownTimer, SIGNAL(timeout()), this, SLOT(secondPassed()));
 }
 
 MainWindow::~MainWindow()
@@ -48,6 +49,7 @@ void MainWindow::new_Number()
     input = "";
 }
 
+
 void MainWindow::keyPressEvent(QKeyEvent *e)
 {
     if (e->key() >= Qt::Key_0 && e->key() <= Qt::Key_9) {
@@ -73,6 +75,9 @@ void MainWindow::keyPressEvent(QKeyEvent *e)
     if (e->key() == Qt::Key_B) {
         qDebug() << "BINGO!!!";
     }
+    if (e->key() == Qt::Key_C) {
+        startCountDown();
+    }
 }
 
 void MainWindow::resizeEvent(QResizeEvent *e)
@@ -94,4 +99,22 @@ QStringList MainWindow::oldNumbers() const {
     } else {
         return numbers.mid(1);
     }
+}
+
+
+void MainWindow::startCountDown() {
+    _countDown = 10*60; //ten minutes
+    ui->declarativeView->setSource(QUrl("Countdown.qml"));
+
+    countDownTimer.start(1000);
+    countDownTimer.setSingleShot(false);
+}
+
+void MainWindow::secondPassed() {
+    if (_countDown <= 0) {
+        countDownTimer.stop();
+        ui->declarativeView->setSource(QUrl("mainview.qml"));
+    }
+    _countDown--;
+    emit countDownChanged();
 }

@@ -3,6 +3,7 @@
 
 #include <QMainWindow>
 #include <QDeclarativeContext>
+#include <QTimer>
 
 namespace Ui {
 class MainWindow;
@@ -26,6 +27,10 @@ class MainWindow : public QMainWindow
     Q_PROPERTY(int height_
                READ height_()
                NOTIFY sizeChanged())
+
+    Q_PROPERTY(QString countDown
+               READ countDown()
+               NOTIFY countDownChanged())
     
 public:
     explicit MainWindow(QWidget *parent = 0);
@@ -43,14 +48,24 @@ public:
         return size.height();
     }
 
+    QString countDown() const {
+        return QString("%1:%2").arg(_countDown/60).arg(_countDown%60);
+    }
+
 signals:
     void lastNumberChanged();
     void oldNumbersChanged();
     void sizeChanged();
+    void countDownChanged();
     
+
+public slots:
+    void startCountDown();
+
 private slots:
     void on_actionFullscreen_triggered();
     void new_Number();
+    void secondPassed();
     
 private:
     void keyPressEvent(QKeyEvent *);
@@ -62,6 +77,8 @@ private:
     QStringList numbers;
     QDeclarativeContext *context;
     QSize size;
+    int _countDown;
+    QTimer countDownTimer;
 };
 
 #endif // MAINWINDOW_H
