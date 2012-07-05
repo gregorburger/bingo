@@ -2,14 +2,14 @@ import QtQuick 1.0
 
 Rectangle {
     id: root_rectangle
-    //color: "#8e8ed7"
+    color: "#ea007b"
 
     Text {
         width: 400
         height: parent.height
-        color: "green"
+        color: "black"
         text: mainwindow.last_number
-        font.family: "Helveticy"
+        font.family: "Arial Black"
         font.pixelSize: root_rectangle.height - 30
         anchors.centerIn: parent
         horizontalAlignment: Text.AlignHCenter
@@ -21,6 +21,7 @@ Rectangle {
         //border.width: 2
         width: root_rectangle.height/10
         height: parent.height
+        color: "#ea007b"
         x: 2
         y: 2
         ListView {
@@ -29,16 +30,17 @@ Rectangle {
             delegate: Rectangle {
                 width: parent.width
                 height: root_rectangle.height/10
-                border.color: "green"
+                border.color: "black"
                 border.width: 4
                 radius: 10
                 Text {
-                    font.pixelSize: root_rectangle.height/12
+                    font.pixelSize: root_rectangle.height/15
                     color: "red"
                     anchors.fill: parent
                     text: modelData
                     horizontalAlignment: Text.AlignHCenter
                     verticalAlignment: Text.AlignVCenter
+                    font.family: "Arial Black"
                 }
             }
         }

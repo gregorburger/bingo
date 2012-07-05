@@ -70,6 +70,15 @@ void MainWindow::keyPressEvent(QKeyEvent *e)
         qDebug() << "enter";
     }
     if (e->key() == Qt::Key_Escape || e->key() == Qt::Key_Backspace) {
+        if (input.length()) {
+            input = "";
+            return;
+        }
+        if (numbers.size()) {
+            numbers.removeFirst();
+            emit oldNumbersChanged();
+        }
+
         qDebug() << "back";
     }
     if (e->key() == Qt::Key_B) {
@@ -103,7 +112,7 @@ QStringList MainWindow::oldNumbers() const {
 
 
 void MainWindow::startCountDown() {
-    _countDown = 10*60; //ten minutes
+    _countDown = 60*10; //ten minutes
     ui->declarativeView->setSource(QUrl("Countdown.qml"));
 
     countDownTimer.start(1000);

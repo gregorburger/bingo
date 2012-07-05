@@ -10,11 +10,16 @@ Flipable {
         anchors.fill: parent
     }
 
-    back: Image {
-        source: "qrc:/imgs/back.png"
+    back: Rectangle {
+        color: "#ea007b"
         anchors.fill: parent
-        smooth: false
-        fillMode: Image.PreserveAspectFit
+        Image {
+            id: back_image
+            anchors.fill: parent
+            smooth: false
+            fillMode: Image.PreserveAspectCrop
+
+        }
     }
 
     transform: Rotation {
@@ -34,17 +39,22 @@ Flipable {
     }
 
     transitions: Transition {
-        NumberAnimation { target: rotation; property: "angle"; duration: 1000 }
+        NumberAnimation { target: rotation; property: "angle"; duration: 250 }
     }
 
     MouseArea {
         anchors.fill: parent
-        onClicked: main.flipped = !main.flipped
+        //onClicked: main.flipped = !main.flipped
     }
 
     focus: true
     Keys.onPressed: {
         if (event.key == Qt.Key_B) {
+            back_image.source = "qrc:/imgs/imgs/bingo.png"
+            main.flipped = !main.flipped
+        }
+        if (event.key == Qt.Key_W) {
+            back_image.source = "qrc:/imgs/imgs/wedgie.jpg"
             main.flipped = !main.flipped
         }
     }

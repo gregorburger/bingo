@@ -3,7 +3,7 @@
         <file>mainview.qml</file>
     </qresource>
     <qresource prefix="/imgs">
-        <file>back.svg</file>
-        <file>back.png</file>
+        <file>imgs/bingo.png</file>
+        <file>imgs/wedgie.jpg</file>
     </qresource>
 </RCC>
