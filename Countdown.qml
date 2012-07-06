@@ -9,7 +9,7 @@ Rectangle {
     Text {
         color: "black"
         anchors.fill: parent
-        font.pixelSize: parent.height * 0.7
+        font.pixelSize: parent.height * 0.6
         text: mainwindow.countDown
         font.family: "Arial Black"
         horizontalAlignment: Text.AlignHCenter

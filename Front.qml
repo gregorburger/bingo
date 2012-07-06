@@ -10,7 +10,7 @@ Rectangle {
         color: "black"
         text: mainwindow.last_number
         font.family: "Arial Black"
-        font.pixelSize: root_rectangle.height - 30
+        font.pixelSize: root_rectangle.height * 0.8
         anchors.centerIn: parent
         horizontalAlignment: Text.AlignHCenter
         verticalAlignment: Text.AlignVCenter

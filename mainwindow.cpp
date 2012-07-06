@@ -69,7 +69,7 @@ void MainWindow::keyPressEvent(QKeyEvent *e)
     if (e->key() == Qt::Key_Enter || e->key() == Qt::Key_Return) {
         qDebug() << "enter";
     }
-    if (e->key() == Qt::Key_Escape || e->key() == Qt::Key_Backspace) {
+    if (e->key() == Qt::Key_Backspace) {
         if (input.length()) {
             input = "";
             return;
@@ -81,6 +81,11 @@ void MainWindow::keyPressEvent(QKeyEvent *e)
 
         qDebug() << "back";
     }
+    if (e->key() == Qt::Key_Escape && countDownTimer.isActive()) {
+        countDownTimer.stop();
+        ui->declarativeView->setSource(QUrl("mainview.qml"));
+    }
+
     if (e->key() == Qt::Key_B) {
         qDebug() << "BINGO!!!";
     }
