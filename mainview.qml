@@ -2,8 +2,8 @@ import QtQuick 1.0
 
 Flipable {
     id: main
-    width: mainwindow.width_
-    height: mainwindow.height_
+    width: bingowindow.width_
+    height: bingowindow.height_
     property bool flipped: false
 
     front: Front {
@@ -18,7 +18,7 @@ Flipable {
             anchors.fill: parent
             smooth: false
             fillMode: Image.PreserveAspectCrop
-
+            source: mainwindow.back_image
         }
     }
 
@@ -32,30 +32,19 @@ Flipable {
 
 
 
-    states: State {
-        name: "back"
+    states: [State {
+        name: "backbingo"
         PropertyChanges { target: rotation; angle: 180 }
-        when: main.flipped
-    }
+        when: mainwindow.bingo
+    }, State {
+        name: "backwedgie"
+        PropertyChanges { target: rotation; angle: 180 }
+        when: mainwindow.wedgie
+    }]
 
     transitions: Transition {
         NumberAnimation { target: rotation; property: "angle"; duration: 250 }
     }
 
-    MouseArea {
-        anchors.fill: parent
-        //onClicked: main.flipped = !main.flipped
-    }
-
     focus: true
-    Keys.onPressed: {
-        if (event.key == Qt.Key_B) {
-            back_image.source = "qrc:/imgs/imgs/bingo.png"
-            main.flipped = !main.flipped
-        }
-        if (event.key == Qt.Key_W) {
-            back_image.source = "qrc:/imgs/imgs/wedgie.jpg"
-            main.flipped = !main.flipped
-        }
-    }
 }

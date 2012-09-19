@@ -1,21 +1,31 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
+#include "ui_bingowindow.h"
+
+#include "bingowindow.h"
 
 #include <QDebug>
 #include <QKeyEvent>
 #include <QDeclarativeContext>
+#include <QDeclarativeView>
 #include <QVariant>
 #include <QGraphicsObject>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
-    ui(new Ui::MainWindow), fullscreen(false)
+    ui(new Ui::MainWindow), fullscreen(false), bingo(false), wedgie(false), countdown(false)
 {
     ui->setupUi(this);
-    context = ui->declarativeView->rootContext();
-    context->setContextProperty("mainwindow", this);
+    bingoWindow = new BingoWindow(this);
+    bingoWindow->show();
     
-    ui->declarativeView->setSource(QUrl("mainview.qml"));
+    declarativeView = bingoWindow->ui->declarativeView;
+    
+    context = declarativeView->rootContext();
+    context->setContextProperty("mainwindow", this);
+    context->setContextProperty("bingowindow", bingoWindow);
+   
+    declarativeView->setSource(QUrl("mainview.qml"));
     addAction(ui->actionFullscreen);
     QObject::connect(&countDownTimer, SIGNAL(timeout()), this, SLOT(secondPassed()));
 }
@@ -25,7 +35,7 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
-void MainWindow::on_actionFullscreen_triggered()
+void MainWindow::on_actionFullscreen_triggered() 
 {
     fullscreen = !fullscreen;
     if (fullscreen) {
@@ -38,76 +48,8 @@ void MainWindow::on_actionFullscreen_triggered()
     }
 }
 
-void MainWindow::new_Number()
+QStringList MainWindow::oldNumbers() const 
 {
-    qDebug() << "new Bingo number " << input;
-    int last_number = input.toInt();
-    Q_ASSERT(last_number <= 75);
-    numbers.push_front(input);
-    emit lastNumberChanged();
-    emit oldNumbersChanged();
-    input = "";
-}
-
-
-void MainWindow::keyPressEvent(QKeyEvent *e)
-{
-    if (e->key() >= Qt::Key_0 && e->key() <= Qt::Key_9) {
-        if (input.length() && input[0]=='7' && e->key() > Qt::Key_5) {
-            qDebug() << "second number after 7 must be smaller than 6";
-            return;
-        }
-        if (!input.length() && e->key() > Qt::Key_7) {
-            qDebug() << "first number must be smaller than 8";
-            return;
-        }
-        input += e->key();
-        if (input.length() >= 2) {
-            new_Number();
-        }
-    }
-    if (e->key() == Qt::Key_Enter || e->key() == Qt::Key_Return) {
-        qDebug() << "enter";
-    }
-    if (e->key() == Qt::Key_Backspace) {
-        if (input.length()) {
-            input = "";
-            return;
-        }
-        if (numbers.size()) {
-            numbers.removeFirst();
-            emit oldNumbersChanged();
-        }
-
-        qDebug() << "back";
-    }
-    if (e->key() == Qt::Key_Escape && countDownTimer.isActive()) {
-        countDownTimer.stop();
-        ui->declarativeView->setSource(QUrl("mainview.qml"));
-    }
-
-    if (e->key() == Qt::Key_B) {
-        qDebug() << "BINGO!!!";
-    }
-    if (e->key() == Qt::Key_C) {
-        startCountDown();
-    }
-}
-
-void MainWindow::resizeEvent(QResizeEvent *e)
-{
-    size = e->size();
-    qDebug() << "resizeEvent" << e->size();
-    emit sizeChanged();
-}
-
-
-
-QString MainWindow::lastNumber() const {
-    return numbers.empty() ? QString("!") : numbers[0];
-}
-
-QStringList MainWindow::oldNumbers() const {
     if (numbers.empty()) {
         return numbers;
     } else {
@@ -118,7 +60,7 @@ QStringList MainWindow::oldNumbers() const {
 
 void MainWindow::startCountDown() {
     _countDown = 60*10; //ten minutes
-    ui->declarativeView->setSource(QUrl("Countdown.qml"));
+    declarativeView->setSource(QUrl("Countdown.qml"));
 
     countDownTimer.start(1000);
     countDownTimer.setSingleShot(false);
@@ -127,8 +69,62 @@ void MainWindow::startCountDown() {
 void MainWindow::secondPassed() {
     if (_countDown <= 0) {
         countDownTimer.stop();
-        ui->declarativeView->setSource(QUrl("mainview.qml"));
+        declarativeView->setSource(QUrl("mainview.qml"));
     }
     _countDown--;
     emit countDownChanged();
+}
+
+#include <cardgenerator.h>
+
+void MainWindow::on_actionGenerate_Cards_triggered() {
+    CardGenerator g;
+    g.generate("Untitled", 24);
+}
+
+void MainWindow::on_bingoButton_toggled(bool checked)
+{
+    bingo = checked;
+    emit bingoChanged();
+    emit backImageChanged();
+}
+
+void MainWindow::on_countdownButton_toggled(bool checked)
+{
+    countdown = checked;
+    emit countdownChanged();
+    if (checked) {
+        startCountDown();
+    } else {
+        declarativeView->setSource(QUrl("mainview.qml"));
+    }
+}
+
+void MainWindow::on_wedgieButton_toggled(bool checked)
+{
+    wedgie = checked;
+    emit wedgieChanged();
+    emit backImageChanged();
+}
+
+void MainWindow::on_lineEdit_returnPressed()
+{
+    bool ok;
+    int number = ui->lineEdit->text().toInt(&ok);
+    if (number <= 75 && ok) {
+        ui->numberList->addItem(ui->lineEdit->text());
+        numbers.push_front(ui->lineEdit->text());
+        emit lastNumberChanged();
+        emit oldNumbersChanged();
+        ui->lineEdit->clear();
+    }
+}
+
+void MainWindow::on_numberList_itemDoubleClicked(QListWidgetItem *item)
+{
+    int row = ui->numberList->row(item);
+    delete ui->numberList->takeItem(row);
+    numbers.removeAt(row);
+    emit oldNumbersChanged();
+    emit lastNumberChanged();
 }

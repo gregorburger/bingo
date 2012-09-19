@@ -9,7 +9,7 @@ Rectangle {
         height: parent.height
         color: "black"
         text: mainwindow.last_number
-        font.family: "Arial Black"
+        font.family: "Ariel Black"
         font.pixelSize: root_rectangle.height * 0.8
         anchors.centerIn: parent
         horizontalAlignment: Text.AlignHCenter
@@ -22,7 +22,7 @@ Rectangle {
         width: root_rectangle.height/10
         height: parent.height
         color: "#ea007b"
-        x: 2
+        x: 2+root_rectangle.width/40
         y: 2
         ListView {
             anchors.fill: parent
@@ -35,12 +35,12 @@ Rectangle {
                 radius: 10
                 Text {
                     font.pixelSize: root_rectangle.height/15
-                    color: "red"
+                    color: "black"
                     anchors.fill: parent
                     text: modelData
                     horizontalAlignment: Text.AlignHCenter
                     verticalAlignment: Text.AlignVCenter
-                    font.family: "Arial Black"
+                    font.family: "Ariel Black"
                 }
             }
         }

@@ -2,8 +2,8 @@
 import QtQuick 1.1
 
 Rectangle {
-    width: mainwindow.width_
-    height: mainwindow.height_
+    width: bingowindow.width_
+    height: bingowindow.height_
     color: "#ea007b"
 
     Text {
@@ -11,7 +11,7 @@ Rectangle {
         anchors.fill: parent
         font.pixelSize: parent.height * 0.6
         text: mainwindow.countDown
-        font.family: "Arial Black"
+        //font.family: "Ariel Black"
         horizontalAlignment: Text.AlignHCenter
         verticalAlignment: Text.AlignVCenter
     }

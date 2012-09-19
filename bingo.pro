@@ -13,11 +13,17 @@ TEMPLATE = app
 
 
 SOURCES += main.cpp\
-        mainwindow.cpp
+        mainwindow.cpp \
+    cardgenerator.cpp \
+    bingowindow.cpp
 
-HEADERS  += mainwindow.h
+HEADERS  += mainwindow.h \
+    cardgenerator.h \
+    bingowindow.h
 
-FORMS    += mainwindow.ui
+FORMS    += mainwindow.ui \
+    cardsdialog.ui \
+    bingowindow.ui
 
 OTHER_FILES += \
     mainview.qml \
