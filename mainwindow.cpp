@@ -27,6 +27,7 @@ MainWindow::MainWindow(QWidget *parent) :
    
     declarativeView->setSource(QUrl("mainview.qml"));
     addAction(ui->actionFullscreen);
+    bingoWindow->addAction(ui->actionFullscreen);
     QObject::connect(&countDownTimer, SIGNAL(timeout()), this, SLOT(secondPassed()));
 }
 
@@ -39,12 +40,9 @@ void MainWindow::on_actionFullscreen_triggered()
 {
     fullscreen = !fullscreen;
     if (fullscreen) {
-        this->showFullScreen();
-        this->menuBar()->setVisible(false);
-        ui->actionFullscreen->setEnabled(true);
+        bingoWindow->showFullScreen();
     } else {
-        this->showNormal();
-        this->menuBar()->setVisible(true);
+        bingoWindow->showNormal();
     }
 }
 
