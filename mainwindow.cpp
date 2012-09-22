@@ -124,7 +124,7 @@ void MainWindow::on_numberList_itemDoubleClicked(QListWidgetItem *item)
 {
     int row = ui->numberList->row(item);
     delete ui->numberList->takeItem(row);
-    numbers.removeAt(row);
+    numbers.removeAt(numbers.size()-row-1);
     emit oldNumbersChanged();
     emit lastNumberChanged();
 }
