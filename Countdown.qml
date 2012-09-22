@@ -11,7 +11,7 @@ Rectangle {
         anchors.fill: parent
         font.pixelSize: parent.height * 0.6
         text: mainwindow.countDown
-        //font.family: "Ariel Black"
+        font.family: "Ariel Black"
         horizontalAlignment: Text.AlignHCenter
         verticalAlignment: Text.AlignVCenter
     }
