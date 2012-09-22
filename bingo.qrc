@@ -4,6 +4,6 @@
     </qresource>
     <qresource prefix="/imgs">
         <file>imgs/bingo.png</file>
-        <file>imgs/wedgie.jpg</file>
+        <file>imgs/wedgie.png</file>
     </qresource>
 </RCC>

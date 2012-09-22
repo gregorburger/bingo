@@ -89,7 +89,7 @@ public slots:
         if (isBingo()) {
             return "qrc:/imgs/imgs/bingo.png";
         } else {
-            return "qrc:/imgs/imgs/wedgie.jpg";
+            return "qrc:/imgs/imgs/wedgie.png";
         }
     }
 
