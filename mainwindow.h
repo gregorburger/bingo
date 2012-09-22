@@ -86,11 +86,7 @@ public slots:
     }
     
     QString backImage() const {
-        if (isBingo()) {
-            return "qrc:/imgs/imgs/bingo.png";
-        } else {
-            return "qrc:/imgs/imgs/wedgie.png";
-        }
+        return img;
     }
 
 private slots:
@@ -122,6 +118,7 @@ private:
     
     int _countDown;
     QTimer countDownTimer;
+    QString img;
     
 };
 

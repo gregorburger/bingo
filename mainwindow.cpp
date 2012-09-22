@@ -83,6 +83,7 @@ void MainWindow::on_actionGenerate_Cards_triggered() {
 void MainWindow::on_bingoButton_toggled(bool checked)
 {
     bingo = checked;
+    img = "qrc:/imgs/imgs/bingo.png";
     emit bingoChanged();
     emit backImageChanged();
 }
@@ -101,6 +102,7 @@ void MainWindow::on_countdownButton_toggled(bool checked)
 void MainWindow::on_wedgieButton_toggled(bool checked)
 {
     wedgie = checked;
+    img = "qrc:/imgs/imgs/wedgie.png";
     emit wedgieChanged();
     emit backImageChanged();
 }
