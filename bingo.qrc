@@ -1,6 +1,8 @@
 <RCC>
     <qresource prefix="/qml">
         <file>mainview.qml</file>
+        <file>Countdown.qml</file>
+        <file>Front.qml</file>
     </qresource>
     <qresource prefix="/imgs">
         <file>imgs/bingo.png</file>

@@ -25,7 +25,7 @@ MainWindow::MainWindow(QWidget *parent) :
     context->setContextProperty("mainwindow", this);
     context->setContextProperty("bingowindow", bingoWindow);
    
-    declarativeView->setSource(QUrl("mainview.qml"));
+    declarativeView->setSource(QUrl("qrc:/qml/mainview.qml"));
     addAction(ui->actionFullscreen);
     bingoWindow->addAction(ui->actionFullscreen);
     QObject::connect(&countDownTimer, SIGNAL(timeout()), this, SLOT(secondPassed()));
@@ -58,7 +58,7 @@ QStringList MainWindow::oldNumbers() const
 
 void MainWindow::startCountDown() {
     _countDown = 60*10; //ten minutes
-    declarativeView->setSource(QUrl("Countdown.qml"));
+    declarativeView->setSource(QUrl("qrc:/qml/Countdown.qml"));
 
     countDownTimer.start(1000);
     countDownTimer.setSingleShot(false);
@@ -67,7 +67,7 @@ void MainWindow::startCountDown() {
 void MainWindow::secondPassed() {
     if (_countDown <= 0) {
         countDownTimer.stop();
-        declarativeView->setSource(QUrl("mainview.qml"));
+        declarativeView->setSource(QUrl("qrc:/qml/mainview.qml"));
     }
     _countDown--;
     emit countDownChanged();
@@ -94,7 +94,7 @@ void MainWindow::on_countdownButton_toggled(bool checked)
     if (checked) {
         startCountDown();
     } else {
-        declarativeView->setSource(QUrl("mainview.qml"));
+        declarativeView->setSource(QUrl("qrc:/qml/mainview.qml"));
     }
 }
 
