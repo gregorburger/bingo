@@ -10,6 +10,7 @@
 #include <QDeclarativeView>
 #include <QVariant>
 #include <QGraphicsObject>
+#include <QSettings>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -17,7 +18,6 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
     bingoWindow = new BingoWindow(this);
-    bingoWindow->show();
     
     declarativeView = bingoWindow->ui->declarativeView;
     
@@ -29,6 +29,13 @@ MainWindow::MainWindow(QWidget *parent) :
     addAction(ui->actionFullscreen);
     bingoWindow->addAction(ui->actionFullscreen);
     QObject::connect(&countDownTimer, SIGNAL(timeout()), this, SLOT(secondPassed()));
+
+    QSettings settings;
+    restoreGeometry(settings.value("mw-geometry").toByteArray());
+    restoreState(settings.value("mw-state").toByteArray());
+    bingoWindow->restoreGeometry(settings.value("bw-geometry").toByteArray());
+
+    bingoWindow->show();
 }
 
 MainWindow::~MainWindow()
@@ -127,4 +134,12 @@ void MainWindow::on_numberList_itemDoubleClicked(QListWidgetItem *item)
     numbers.removeAt(numbers.size()-row-1);
     emit oldNumbersChanged();
     emit lastNumberChanged();
+}
+
+void MainWindow::closeEvent(QCloseEvent *event) {
+    QSettings settings;
+    settings.setValue("mw-geometry", saveGeometry());
+    settings.setValue("mw-state", saveState());
+    settings.setValue("bw-geometry", bingoWindow->saveGeometry());
+    QMainWindow::closeEvent(event);
 }

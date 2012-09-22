@@ -106,6 +106,7 @@ private slots:
     void on_numberList_itemDoubleClicked(QListWidgetItem *item);
     
 private:
+    void closeEvent(QCloseEvent *);
     
     Ui::MainWindow *ui;
     BingoWindow *bingoWindow;
