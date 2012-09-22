@@ -11,6 +11,7 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 TARGET = bingo
 TEMPLATE = app
 
+INCLUDEPATH += ./3rdparty/
 
 SOURCES += main.cpp\
         mainwindow.cpp \
