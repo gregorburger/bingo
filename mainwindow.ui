@@ -28,7 +28,11 @@
        <widget class="QListWidget" name="numberList"/>
       </item>
       <item>
-       <widget class="QLineEdit" name="lineEdit"/>
+       <widget class="QLineEdit" name="lineEdit">
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        </property>
+       </widget>
       </item>
      </layout>
     </item>
@@ -107,7 +111,7 @@
      <x>0</x>
      <y>0</y>
      <width>489</width>
-     <height>25</height>
+     <height>29</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuWindow">
@@ -121,7 +125,7 @@
      <string>Bingo</string>
     </property>
     <addaction name="actionNew_Game"/>
-    <addaction name="actionLoad_Game"/>
+    <addaction name="actionOpen_Game"/>
    </widget>
    <addaction name="menuBingo"/>
    <addaction name="menuWindow"/>
@@ -134,20 +138,20 @@
     <string>F11</string>
    </property>
   </action>
-  <action name="actionLoad_Game">
-   <property name="text">
-    <string>Load Game</string>
-   </property>
-   <property name="shortcut">
-    <string>Ctrl+O</string>
-   </property>
-  </action>
   <action name="actionNew_Game">
    <property name="text">
     <string>New Game</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+N</string>
+   </property>
+  </action>
+  <action name="actionOpen_Game">
+   <property name="text">
+    <string>Open Game</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+O</string>
    </property>
   </action>
  </widget>
