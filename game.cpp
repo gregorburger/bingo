@@ -14,6 +14,8 @@
 #include <QSvgRenderer>
 #include <QTemporaryFile>
 #include <QProgressDialog>
+#include <QEventLoop>
+#include <QApplication>
 #include "qjson/src/serializer.h"
 
 #include <iostream>
@@ -64,22 +66,34 @@ void Game::saveGame(const QDir &dir, const QString &name)
     f.close();
 }
 
-struct formatter {
+struct number_replacer {
     const Card &c1, &c2;
-    formatter(const Card &c1, const Card &c2) : c1(c1), c2(c2) {
+    number_replacer(const Card &c1, const Card &c2) : c1(c1), c2(c2) {
 
     }
 
     std::string operator()(boost::smatch what) {
-        std::string num = what.str(0);
-        std::string num1 = std::string(num.begin()+1, num.end());
-        int idx = boost::lexical_cast<int>(num1) - 1;
+        int idx = boost::lexical_cast<int>(what.str(1)) - 1;
         if (idx < 25) {
             return boost::lexical_cast<std::string>(c1.numbers[idx/5][idx%5]);
         }
         idx -= 25;
         return boost::lexical_cast<std::string>(c2.numbers[idx/5][idx%5]);
         return "gag";
+    }
+};
+
+struct id_replacer {
+    std::string id1, id2;
+    
+    id_replacer(int id1, int id2) {
+        this->id1 = boost::lexical_cast<std::string>(id1);
+        this->id2 = boost::lexical_cast<std::string>(id2);
+    }
+    
+    std::string operator()(boost::smatch what) {
+        std::string num = what.str(1);
+        return num == "1" ? id1 : id2;
     }
 };
 
@@ -92,9 +106,8 @@ void Game::renderCards(const QDir &dir, const QString &name, QWidget *parent)
     printer.setOrientation(QPrinter::Landscape);
     printer.setOutputFileName(dir.absoluteFilePath(name+".pdf"));
     QPainter painter(&printer);
-
-    QFile svg_template;
-    svg_template.setFileName(":/imgs/template.svg");
+    
+    QFile svg_template("imgs/template.svg");
     bool opened = svg_template.open(QFile::ReadOnly);
     Q_ASSERT(opened);
     QString orig_template = svg_template.readAll();
@@ -105,7 +118,8 @@ void Game::renderCards(const QDir &dir, const QString &name, QWidget *parent)
     dialog.setMaximum(cards.size()/2);
     dialog.setLabelText("Rendering Bingo Cards");
 
-    boost::regex regexp("%([0-9]+)");
+    boost::regex number_re("%([0-9]+)");
+    boost::regex id_re("#id(1|2)");
 
     for (int i = 0; i < cards.size()/2; i++) {
         qApp->processEvents();
@@ -116,15 +130,10 @@ void Game::renderCards(const QDir &dir, const QString &name, QWidget *parent)
         Card c1 = cards[i*2];
         Card c2 = cards[i*2+1];
 
-        formatter fmter(c1, c2);
-        std::string svg_src = boost::regex_replace(_template, regexp, fmter);
-
-        QTemporaryFile tmpf("XXXXXXXX.svg");
-        tmpf.setAutoRemove(false);
-        tmpf.open();
-        QTextStream out(&tmpf);
-
-        out << QString::fromStdString(svg_src);
+        number_replacer fmter(c1, c2);
+        std::string svg_src = boost::regex_replace(_template, number_re, fmter);
+        id_replacer idter(i, i+1);
+        svg_src = boost::regex_replace(svg_src, id_re, idter);
 
         QSvgRenderer renderer(QString::fromStdString(svg_src).toAscii());
         renderer.render(&painter);
