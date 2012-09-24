@@ -89,7 +89,7 @@ void Game::saveGame(const QDir &dir, const QString &name)
     foreach(Card c, this->cards) {
         QVariantList numbers;
         for (int i = 0; i < 5*5; i++) {
-            numbers.push_back(c.numbers[i/5][i%5]);
+            numbers.push_back(c.numbers[i%5][i/5]);
         }
         cards.push_back(numbers);
     }
@@ -109,11 +109,10 @@ struct number_replacer {
     std::string operator()(boost::smatch what) {
         int idx = boost::lexical_cast<int>(what.str(1)) - 1;
         if (idx < 25) {
-            return boost::lexical_cast<std::string>(c1.numbers[idx/5][idx%5]);
+            return boost::lexical_cast<std::string>(c1.numbers[idx%5][idx/5]);
         }
         idx -= 25;
-        return boost::lexical_cast<std::string>(c2.numbers[idx/5][idx%5]);
-        return "gag";
+        return boost::lexical_cast<std::string>(c2.numbers[idx%5][idx/5]);
     }
 };
 
@@ -166,7 +165,7 @@ void Game::renderCards(const QDir &dir, const QString &name, QWidget *parent)
 
         number_replacer fmter(c1, c2);
         std::string svg_src = boost::regex_replace(_template, number_re, fmter);
-        id_replacer idter(i, i+1);
+        id_replacer idter(i*2, i*2+1);
         svg_src = boost::regex_replace(svg_src, id_re, idter);
 
         QSvgRenderer renderer(QString::fromStdString(svg_src).toAscii());
@@ -190,7 +189,7 @@ Card Card::random()
         cout << new_number << " ";
         if (card_numbers.contains(new_number)) continue;
         card_numbers.insert(new_number);
-        card.numbers[i/5][i%5] = new_number;
+        card.numbers[i%5][i/5] = new_number;
         i++;
     }
     cout << endl;
