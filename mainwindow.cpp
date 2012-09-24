@@ -12,6 +12,8 @@
 #include <QVariant>
 #include <QGraphicsObject>
 #include <QSettings>
+#include <QFileDialog>
+#include <QScrollBar>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -37,6 +39,7 @@ MainWindow::MainWindow(QWidget *parent) :
     bingoWindow->restoreGeometry(settings.value("bw-geometry").toByteArray());
 
     bingoWindow->show();
+    this->connect(ui->numberList->verticalScrollBar(), SIGNAL(rangeChanged(int,int)), SLOT(ensure_Scrolled_Down(int,int)));
 }
 
 MainWindow::~MainWindow()
@@ -162,5 +165,12 @@ void MainWindow::on_actionOpen_Game_triggered()
     if (file != "") {
         game = Game(file, this);
     }
+}
+
+void MainWindow::ensure_Scrolled_Down(int min, int max)
+{
+    Q_UNUSED(min);
+    QScrollBar *sb = ui->numberList->verticalScrollBar();
+    sb->setValue(max);
 }
 

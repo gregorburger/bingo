@@ -109,6 +109,8 @@ private slots:
 
     void on_actionOpen_Game_triggered();
     
+    void ensure_Scrolled_Down(int min, int max);
+    
 private:
     void closeEvent(QCloseEvent *);
     
