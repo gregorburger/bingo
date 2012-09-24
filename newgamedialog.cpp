@@ -29,7 +29,7 @@ Game *NewGameDialog::getGame(QWidget *parent, bool save_game, bool render_cards)
         if (save_game)
             g->saveGame(QDir(dialog.ui->place->text()), dialog.ui->name->text());
         if (render_cards)
-            g->renderCards(QDir(dialog.ui->place->text()), dialog.ui->name->text());
+            g->renderCards(QDir(dialog.ui->place->text()), dialog.ui->name->text(), &dialog);
         return g;
     }
     return 0;

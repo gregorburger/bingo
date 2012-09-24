@@ -38,7 +38,7 @@ public:
 
     QStringList getPossibleWinners() const;
     void saveGame(const QDir &dir, const QString &name);
-    void renderCards(const QDir &dir, const QString &name);
+    void renderCards(const QDir &dir, const QString &name, QWidget *parent);
 
     void set(int number) {
         set_unset(number, true);

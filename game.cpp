@@ -84,7 +84,7 @@ struct formatter {
 };
 
 
-void Game::renderCards(const QDir &dir, const QString &name)
+void Game::renderCards(const QDir &dir, const QString &name, QWidget *parent)
 {
     QPrinter printer;
     printer.setPageSize(QPrinter::A4);
@@ -100,11 +100,19 @@ void Game::renderCards(const QDir &dir, const QString &name)
     QString orig_template = svg_template.readAll();
     std::string _template = orig_template.toStdString();
 
-    QProgressDialog dialog("rendering cards", "cancel", 0, cards.size()/2);
+    QProgressDialog dialog(parent);
+    dialog.setMinimum(0);
+    dialog.setMaximum(cards.size()/2);
+    dialog.setLabelText("Rendering Bingo Cards");
 
     boost::regex regexp("%([0-9]+)");
 
     for (int i = 0; i < cards.size()/2; i++) {
+        qApp->processEvents();
+        dialog.setValue(i);
+        if (dialog.wasCanceled()) {
+            break;
+        }
         Card c1 = cards[i*2];
         Card c2 = cards[i*2+1];
 
@@ -121,7 +129,7 @@ void Game::renderCards(const QDir &dir, const QString &name)
         QSvgRenderer renderer(QString::fromStdString(svg_src).toAscii());
         renderer.render(&painter);
         printer.newPage();
-        dialog.setValue(i);
+        
     }
 
 }
