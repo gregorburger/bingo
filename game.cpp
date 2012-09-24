@@ -14,7 +14,7 @@
 #include <QSvgRenderer>
 #include <QTemporaryFile>
 #include <QProgressDialog>
-#include <qjson/serializer.h>
+#include "qjson/src/serializer.h"
 
 #include <iostream>
 using namespace std;
