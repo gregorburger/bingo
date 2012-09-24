@@ -16,7 +16,9 @@
 #include <QProgressDialog>
 #include <QEventLoop>
 #include <QApplication>
+#include <QMessageBox>
 #include "qjson/src/serializer.h"
+#include "qjson/src/parser.h"
 
 #include <iostream>
 using namespace std;
@@ -25,9 +27,41 @@ Game::Game()
 {
 }
 
-Game::Game(const QString &save_game)
+Game::Game(const QString &save_game, QWidget *parent)
 {
-
+    if (!QFile::exists(save_game)) {
+        QMessageBox::information(parent, "errer opening game file", "could not locate game file");
+        return;
+    }
+    QFile f(save_game);
+    if (!f.open(QFile::ReadOnly)) {
+        QMessageBox::information(parent, "errer opening game file", "could not open game file");
+        return;
+    }
+    
+    QString contents = f.readAll();
+    QJson::Parser parser;
+    bool ok;
+    
+    QList<QVariant> cards = parser.parse(contents.toAscii(), &ok).toList();
+    if (!ok) {
+        QMessageBox::information(parent, "errer opening game file", "could not parse game file");
+        return;
+    }
+    foreach(QVariant card, cards) {
+        Card c;
+        Q_ASSERT(card.canConvert<QVariantList>());
+        int i = 0;
+        foreach(QVariant number, card.toList()) {
+            Q_ASSERT(number.canConvert<int>());
+            bool ok;
+            c.numbers[i%5][i/5] = number.toInt(&ok);
+            Q_ASSERT(ok);
+            i++;
+        }
+        this->cards.push_back(c);
+        this->stencils.push_back(Stencil());
+    }
 }
 
 Game::Game(int number_of_cards)
@@ -141,10 +175,6 @@ void Game::renderCards(const QDir &dir, const QString &name, QWidget *parent)
         
     }
 
-}
-
-void Game::load_game(const QString &save_game)
-{
 }
 
 boost::random::mt19937 rng(std::time(0));

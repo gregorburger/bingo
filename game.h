@@ -33,7 +33,7 @@ class Game
 {
 public:
     Game();
-    Game(const QString &save_game);
+    Game(const QString &save_game, QWidget *parent);
     Game(int number_of_cards);
 
     QStringList getPossibleWinners() const;

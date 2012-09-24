@@ -155,3 +155,12 @@ void MainWindow::on_actionNew_Game_triggered()
         delete game;
     }
 }
+
+void MainWindow::on_actionOpen_Game_triggered()
+{
+    QString file = QFileDialog::getOpenFileName(this, "Open Game", QDir::currentPath(), "Bingo File (*.bgo)");
+    if (file != "") {
+        game = Game(file, this);
+    }
+}
+

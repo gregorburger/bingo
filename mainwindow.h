@@ -107,6 +107,8 @@ private slots:
     
     void on_actionNew_Game_triggered();
 
+    void on_actionOpen_Game_triggered();
+    
 private:
     void closeEvent(QCloseEvent *);
     
