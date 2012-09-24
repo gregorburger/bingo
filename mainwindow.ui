@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>842</width>
-    <height>492</height>
+    <width>489</width>
+    <height>369</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -18,10 +18,31 @@
     <item>
      <layout class="QVBoxLayout" name="verticalLayout">
       <item>
+       <widget class="QLabel" name="label">
+        <property name="text">
+         <string>Bingo Numbers:</string>
+        </property>
+       </widget>
+      </item>
+      <item>
        <widget class="QListWidget" name="numberList"/>
       </item>
       <item>
        <widget class="QLineEdit" name="lineEdit"/>
+      </item>
+     </layout>
+    </item>
+    <item>
+     <layout class="QVBoxLayout" name="verticalLayout_3">
+      <item>
+       <widget class="QLabel" name="label_2">
+        <property name="text">
+         <string>Possible Winners:</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QListWidget" name="possibleWinners"/>
       </item>
      </layout>
     </item>
@@ -85,8 +106,8 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>842</width>
-     <height>29</height>
+     <width>489</width>
+     <height>25</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuWindow">
@@ -99,10 +120,11 @@
     <property name="title">
      <string>Bingo</string>
     </property>
-    <addaction name="actionGenerate_Cards"/>
+    <addaction name="actionNew_Game"/>
+    <addaction name="actionLoad_Game"/>
    </widget>
-   <addaction name="menuWindow"/>
    <addaction name="menuBingo"/>
+   <addaction name="menuWindow"/>
   </widget>
   <action name="actionFullscreen">
    <property name="text">
@@ -112,12 +134,20 @@
     <string>F11</string>
    </property>
   </action>
-  <action name="actionGenerate_Cards">
+  <action name="actionLoad_Game">
    <property name="text">
-    <string>generate Cards</string>
+    <string>Load Game</string>
    </property>
    <property name="shortcut">
-    <string>Ctrl+G</string>
+    <string>Ctrl+O</string>
+   </property>
+  </action>
+  <action name="actionNew_Game">
+   <property name="text">
+    <string>New Game</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+N</string>
    </property>
   </action>
  </widget>

@@ -4,9 +4,10 @@
 int main(int argc, char *argv[])
 {
    QApplication a(argc, argv);
-   QCoreApplication::setApplicationName("bingo");
-   QCoreApplication::setOrganizationName("ripbmxibk");
-   QCoreApplication::setOrganizationDomain("ripbmxibk.com");
+   Q_INIT_RESOURCE(bingo);
+   QCoreApplication::setApplicationName(QString::fromAscii("bingo"));
+   QCoreApplication::setOrganizationName(QString::fromAscii("ripbmxibk"));
+   QCoreApplication::setOrganizationDomain(QString::fromAscii("ripbmxibk.com"));
    MainWindow w;
    w.show();
    

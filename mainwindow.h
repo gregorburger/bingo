@@ -4,6 +4,8 @@
 #include <QMainWindow>
 #include <QTimer>
 
+#include "game.h"
+
 namespace Ui {
 class MainWindow;
 }
@@ -50,13 +52,13 @@ public:
     ~MainWindow();
     
     QString lastNumber() const {
-        return numbers.size() > 0 ? numbers.first() : "!";
+        return numbers.size() > 0 ? numbers.first() : QString::fromAscii("!");
     }
     
     QStringList oldNumbers() const;
 
     QString countDown() const {
-        return QString("%1:%2").arg(_countDown/60).arg(_countDown%60);
+        return QString::fromAscii("%1:%2").arg(_countDown/60).arg(_countDown%60);
     }
 
 signals:
@@ -93,8 +95,6 @@ private slots:
     void on_actionFullscreen_triggered();
     void secondPassed();
     
-    void on_actionGenerate_Cards_triggered();
-    
     void on_bingoButton_toggled(bool checked);
     
     void on_countdownButton_toggled(bool checked);
@@ -105,6 +105,8 @@ private slots:
     
     void on_numberList_itemDoubleClicked(QListWidgetItem *item);
     
+    void on_actionNew_Game_triggered();
+
 private:
     void closeEvent(QCloseEvent *);
     
@@ -120,7 +122,8 @@ private:
     int _countDown;
     QTimer countDownTimer;
     QString img;
-    
+
+    Game game;
 };
 
 #endif // MAINWINDOW_H

@@ -3,6 +3,7 @@
 #include "ui_bingowindow.h"
 
 #include "bingowindow.h"
+#include "newgamedialog.h"
 
 #include <QDebug>
 #include <QKeyEvent>
@@ -80,13 +81,6 @@ void MainWindow::secondPassed() {
     emit countDownChanged();
 }
 
-#include <cardgenerator.h>
-
-void MainWindow::on_actionGenerate_Cards_triggered() {
-    CardGenerator g;
-    g.generate("Untitled", 24);
-}
-
 void MainWindow::on_bingoButton_toggled(bool checked)
 {
     bingo = checked;
@@ -124,16 +118,25 @@ void MainWindow::on_lineEdit_returnPressed()
         emit lastNumberChanged();
         emit oldNumbersChanged();
         ui->lineEdit->clear();
+
+        game.set(number);
+        ui->possibleWinners->clear();
+        ui->possibleWinners->addItems(game.getPossibleWinners());
     }
 }
 
 void MainWindow::on_numberList_itemDoubleClicked(QListWidgetItem *item)
 {
     int row = ui->numberList->row(item);
+    int number = ui->numberList->item(row)->text().toInt();
     delete ui->numberList->takeItem(row);
     numbers.removeAt(numbers.size()-row-1);
     emit oldNumbersChanged();
     emit lastNumberChanged();
+
+    game.unset(number);
+    ui->possibleWinners->clear();
+    ui->possibleWinners->addItems(game.getPossibleWinners());
 }
 
 void MainWindow::closeEvent(QCloseEvent *event) {
@@ -142,4 +145,13 @@ void MainWindow::closeEvent(QCloseEvent *event) {
     settings.setValue("mw-state", saveState());
     settings.setValue("bw-geometry", bingoWindow->saveGeometry());
     QMainWindow::closeEvent(event);
+}
+
+void MainWindow::on_actionNew_Game_triggered()
+{
+    Game *game = NewGameDialog::getGame(this);
+    if (game) {
+        this->game = *game;
+        delete game;
+    }
 }

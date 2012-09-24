@@ -7,5 +7,6 @@
     <qresource prefix="/imgs">
         <file>imgs/bingo.png</file>
         <file>imgs/wedgie.png</file>
+        <file alias="template">imgs/template.svg</file>
     </qresource>
 </RCC>

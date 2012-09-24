@@ -16,6 +16,7 @@ BingoWindow::~BingoWindow()
 
 void BingoWindow::resizeEvent(QResizeEvent *e) 
 {
+    QWidget::resizeEvent(e);
     size = e->size();
     emit sizeChanged();
 }
