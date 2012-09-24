@@ -16,7 +16,9 @@ qt4_wrap_ui(UI_SRCS ${UI_FILES})
 qt4_add_resources(RCSR_SRCS bingo.qrc)
 
 
-include_directories(${CMAKE_CURRENT_BINARY_DIR} 3rdparty)
+include_directories(${CMAKE_CURRENT_BINARY_DIR} 3rdparty ${Boost_INCLUDE_DIR})
+
+link_directories(${Boost_LIBRARY_DIRS})
 
 add_executable(bingo ${SRCS} ${UI_SRCS} ${RCSR_SRCS})
 target_link_libraries(bingo qjson ${QT_LIBRARIES} ${Boost_REGEX_LIBRARY})
