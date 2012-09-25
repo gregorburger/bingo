@@ -68,7 +68,7 @@ QStringList MainWindow::oldNumbers() const
 
 
 void MainWindow::startCountDown() {
-    _countDown = 60*10; //ten minutes
+    _countDown = 60*20; //twenty minutes
     declarativeView->setSource(QUrl("qrc:/qml/Countdown.qml"));
 
     countDownTimer.start(1000);
