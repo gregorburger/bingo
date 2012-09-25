@@ -52,7 +52,7 @@ public:
     ~MainWindow();
     
     QString lastNumber() const {
-        return numbers.size() > 0 ? numbers.first() : QString::fromAscii("!");
+        return numbers.size() > 0 ? numbers.first() : QString("!");
     }
     
     QStringList oldNumbers() const;
