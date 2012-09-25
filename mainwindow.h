@@ -58,7 +58,9 @@ public:
     QStringList oldNumbers() const;
 
     QString countDown() const {
-        return QString::fromAscii("%1:%2").arg(_countDown/60).arg(_countDown%60);
+        return QString("%1:%2")
+                .arg(_countDown/60, 2, 10, QLatin1Char('0'))
+                .arg(_countDown%60, 2, 10, QLatin1Char('0'));
     }
 
 signals:
