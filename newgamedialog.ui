@@ -26,6 +26,15 @@
    </item>
    <item row="0" column="1">
     <widget class="QSpinBox" name="count">
+     <property name="minimum">
+      <number>0</number>
+     </property>
+     <property name="maximum">
+      <number>3000</number>
+     </property>
+     <property name="singleStep">
+      <number>2</number>
+     </property>
      <property name="value">
       <number>30</number>
      </property>
@@ -71,7 +80,9 @@
         <string/>
        </property>
        <property name="icon">
-        <iconset theme="document-open"/>
+        <iconset theme="document-open">
+         <normaloff/>
+        </iconset>
        </property>
       </widget>
      </item>
