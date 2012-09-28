@@ -348,12 +348,10 @@ QString Stencil::getWin() const
 {
     QStringList win;
 
-    if (isStar()) win << "Star";
     if (isVertical()) win << "Vertical";
     if (isHorizontal()) win << "Horizontal";
     if (isDiagonal()) win << "Diagonal";
     if (isCross()) win << "Cross";
-    if (isPenis()) win << "Penis";
     if (isCircle()) win << "Circle";
     if (isSoFuckingClose()) win << "So Fucking Close";
     if (isBingo()) win << "Bingo";
