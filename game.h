@@ -10,7 +10,7 @@
 
 struct Card {
     boost::array<boost::array<int, 5>, 5> numbers;
-    static Card random();
+    static Card random(int max_numbers);
 };
 
 struct Stencil {
@@ -29,12 +29,11 @@ struct Stencil {
     bool isBingo() const;
 };
 
-class Game
-{
+class Game {
 public:
     Game();
     Game(const QString &save_game, QWidget *parent);
-    Game(int number_of_cards);
+    Game(int number_of_cards, int max_numbers);
 
     QStringList getPossibleWinners() const;
     void saveGame(const QDir &dir, const QString &name);
@@ -48,11 +47,14 @@ public:
         set_unset(number, false);
     }
 
+    int max_numbers;
+
 private:
     void set_unset(int number, bool v);
     void load_game(const QString &save_game);
     QVector<Card> cards;
     QVector<Stencil> stencils;
+
 };
 
 #endif // GAME_H

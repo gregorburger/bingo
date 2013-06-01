@@ -3,6 +3,7 @@
 
 #include <QMainWindow>
 #include <QTimer>
+#include <boost/array.hpp>
 
 #include "game.h"
 
@@ -14,9 +15,9 @@ class QDeclarativeView;
 class QDeclarativeContext;
 class QListWidgetItem;
 class BingoWindow;
+class QPushButton;
 
-class MainWindow : public QMainWindow
-{
+class MainWindow : public QMainWindow {
     Q_OBJECT
     Q_PROPERTY(QString last_number
                READ lastNumber()
@@ -63,6 +64,8 @@ public:
                 .arg(_countDown%60, 2, 10, QLatin1Char('0'));
     }
 
+    void setMaxNumbers(int max_numbers);
+
 signals:
     void lastNumberChanged();
     void oldNumbersChanged();
@@ -93,26 +96,20 @@ public slots:
         return img;
     }
 
-private slots:
-    void on_actionFullscreen_triggered();
-    void secondPassed();
-    
-    void on_bingoButton_toggled(bool checked);
-    
-    void on_countdownButton_toggled(bool checked);
-    
-    void on_wedgieButton_toggled(bool checked);
-    
-    void on_lineEdit_returnPressed();
-    
-    void on_numberList_itemDoubleClicked(QListWidgetItem *item);
-    
-    void on_actionNew_Game_triggered();
 
+    void buttonToggled(bool t);
+
+private slots:
+    void secondPassed();
+
+    void on_actionNew_Game_triggered();
     void on_actionOpen_Game_triggered();
-    
-    void ensure_Scrolled_Down(int min, int max);
-    
+    void on_actionFullscreen_triggered();
+
+    void on_actionBingo_toggled(bool arg1);
+    void on_actionCountdown_toggled(bool arg1);
+    void on_actionWedgie_toggled(bool arg1);
+
 private:
     void closeEvent(QCloseEvent *);
     
@@ -130,6 +127,9 @@ private:
     QString img;
 
     Game game;
+
+    boost::array<QPushButton *, 75> buttons;
+    boost::array<bool, 75> state;
 };
 
 #endif // MAINWINDOW_H

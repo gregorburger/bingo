@@ -23,12 +23,10 @@
 #include <iostream>
 using namespace std;
 
-Game::Game()
-{
+Game::Game() {
 }
 
-Game::Game(const QString &save_game, QWidget *parent)
-{
+Game::Game(const QString &save_game, QWidget *parent) {
     if (!QFile::exists(save_game)) {
         QMessageBox::information(parent, "errer opening game file", "could not locate game file");
         return;
@@ -43,11 +41,18 @@ Game::Game(const QString &save_game, QWidget *parent)
     QJson::Parser parser;
     bool ok;
     
-    QList<QVariant> cards = parser.parse(contents.toAscii(), &ok).toList();
+    QVariantMap bingo = parser.parse(contents.toAscii(), &ok).toMap();
     if (!ok) {
         QMessageBox::information(parent, "errer opening game file", "could not parse game file");
         return;
     }
+
+    this->max_numbers = bingo["max_numbers"].toInt(&ok);
+
+    Q_ASSERT(ok);
+
+    QList<QVariant> cards = bingo["cards"].toList();
+
     foreach(QVariant card, cards) {
         Card c;
         Q_ASSERT(card.canConvert<QVariantList>());
@@ -64,16 +69,14 @@ Game::Game(const QString &save_game, QWidget *parent)
     }
 }
 
-Game::Game(int number_of_cards)
-{
+Game::Game(int number_of_cards, int max_numbers) : max_numbers(max_numbers) {
     for (int i = 0; i < number_of_cards; ++i) {
-        cards.push_back(Card::random());
+        cards.push_back(Card::random(max_numbers));
         stencils.push_back(Stencil());
     }
 }
 
-QStringList Game::getPossibleWinners() const
-{
+QStringList Game::getPossibleWinners() const {
     QStringList winners;
     for (int i = 0; i < cards.size(); ++i) {
         QString win = stencils[i].getWin();
@@ -83,8 +86,11 @@ QStringList Game::getPossibleWinners() const
     return winners;
 }
 
-void Game::saveGame(const QDir &dir, const QString &name)
-{
+void Game::saveGame(const QDir &dir, const QString &name) {
+    QVariantMap bingo;
+
+    bingo["max_numbers"] = max_numbers;
+
     QVariantList cards;
     foreach(Card c, this->cards) {
         QVariantList numbers;
@@ -93,10 +99,13 @@ void Game::saveGame(const QDir &dir, const QString &name)
         }
         cards.push_back(numbers);
     }
+
+    bingo["cards"] = cards;
+
     QJson::Serializer ser;
     QFile f(dir.absoluteFilePath(name+".bgo"));
     f.open(QFile::WriteOnly);
-    f.write(ser.serialize(cards));
+    f.write(ser.serialize(bingo));
     f.close();
 }
 
@@ -131,8 +140,7 @@ struct id_replacer {
 };
 
 
-void Game::renderCards(const QDir &dir, const QString &name, QWidget *parent)
-{
+void Game::renderCards(const QDir &dir, const QString &name, QWidget *parent) {
     QPrinter printer;
     printer.setPageSize(QPrinter::A4);
     printer.setOutputFormat(QPrinter::PdfFormat);
@@ -177,22 +185,22 @@ void Game::renderCards(const QDir &dir, const QString &name, QWidget *parent)
 }
 
 boost::random::mt19937 rng(std::time(0));
-boost::random::uniform_int_distribution<> gen(1, 75);
 
-Card Card::random()
-{
+
+Card Card::random(int max_numbers) {
+    boost::random::uniform_int_distribution<> gen(1, max_numbers);
     Card card;
     int i = 0;
     QSet<int> card_numbers;
     while (i < 5*5) {
         int new_number = gen(rng);
-        cout << new_number << " ";
+        //cout << new_number << " ";
         if (card_numbers.contains(new_number)) continue;
         card_numbers.insert(new_number);
         card.numbers[i%5][i/5] = new_number;
         i++;
     }
-    cout << endl;
+    //cout << endl;
     return card;
 }
 
@@ -205,8 +213,7 @@ Stencil::Stencil() {
     numbers[2][2] = true; //middle is a win
 }
 
-void Game::set_unset(int number, bool v)
-{
+void Game::set_unset(int number, bool v) {
     for (int i = 0; i < cards.size(); ++i) {
         for (size_t x = 0; x < 5; ++x) {
             for (size_t y = 0; y < 5; ++y) {
@@ -220,8 +227,7 @@ void Game::set_unset(int number, bool v)
 }
 
 
-bool Stencil::isStar() const
-{
+bool Stencil::isStar() const {
     bool win = true;
     for (int x = 0; x < 5; ++x) {
         for (int y = 0; y < 5; ++y) {
@@ -240,8 +246,7 @@ bool Stencil::isStar() const
     return win;
 }
 
-bool Stencil::isVertical() const
-{
+bool Stencil::isVertical() const {
     bool win = false;
     for (int x = 0; x < 5; ++x) {
         bool line = true;
@@ -253,8 +258,7 @@ bool Stencil::isVertical() const
     return win;
 }
 
-bool Stencil::isHorizontal() const
-{
+bool Stencil::isHorizontal() const {
     bool win = false;
     for (int y = 0; y < 5; ++y) {
         bool row = true;
@@ -266,8 +270,7 @@ bool Stencil::isHorizontal() const
     return win;
 }
 
-bool Stencil::isDiagonal() const
-{
+bool Stencil::isDiagonal() const {
     bool d1 = true;
     bool d2 = true;
     for (int i = 0; i < 5; ++i) {

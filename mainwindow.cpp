@@ -39,16 +39,33 @@ MainWindow::MainWindow(QWidget *parent) :
     bingoWindow->restoreGeometry(settings.value("bw-geometry").toByteArray());
 
     bingoWindow->show();
-    this->connect(ui->numberList->verticalScrollBar(), SIGNAL(rangeChanged(int,int)), SLOT(ensure_Scrolled_Down(int,int)));
+
+    foreach(QObject *child, ui->button_field->children()) {
+        if (child->metaObject()->className() == QString("QPushButton")) {
+            QPushButton *button = (QPushButton *) child;
+            bool ok;
+            int idx = button->text().toInt(&ok) - 1;
+            if (!ok) continue;
+            Q_ASSERT(idx >= 0 && idx < 75);
+            buttons[idx] = button;
+            state[idx] = false;
+            this->connect(button, SIGNAL(toggled(bool)), SLOT(buttonToggled(bool)));
+        }
+    }
+
+#if 0
+    QActionGroup *group = new QActionGroup(ui->toolBar);
+    group->addAction(ui->actionBingo);
+    group->addAction(ui->actionCountdown);
+    group->addAction(ui->actionWedgie);
+#endif
 }
 
-MainWindow::~MainWindow()
-{
+MainWindow::~MainWindow() {
     delete ui;
 }
 
-void MainWindow::on_actionFullscreen_triggered() 
-{
+void MainWindow::on_actionFullscreen_triggered() {
     fullscreen = !fullscreen;
     if (fullscreen) {
         bingoWindow->showFullScreen();
@@ -63,6 +80,16 @@ QStringList MainWindow::oldNumbers() const
         return numbers;
     } else {
         return numbers.mid(1);
+    }
+}
+
+void MainWindow::setMaxNumbers(int max_numbers) {
+    foreach (QPushButton *button, buttons) {
+        button->setEnabled(true);
+    }
+
+    for (int i = max_numbers; i < buttons.size(); i++) {
+        buttons[i]->setEnabled(false);
     }
 }
 
@@ -84,16 +111,67 @@ void MainWindow::secondPassed() {
     emit countDownChanged();
 }
 
-void MainWindow::on_bingoButton_toggled(bool checked)
-{
+void MainWindow::closeEvent(QCloseEvent *event) {
+    QSettings settings;
+    settings.setValue("mw-geometry", saveGeometry());
+    settings.setValue("mw-state", saveState());
+    settings.setValue("bw-geometry", bingoWindow->saveGeometry());
+    QMainWindow::closeEvent(event);
+}
+
+void MainWindow::on_actionNew_Game_triggered() {
+    Game *game = NewGameDialog::getGame(this);
+    if (game) {
+        this->game = *game;
+        delete game;
+    }
+}
+
+void MainWindow::on_actionOpen_Game_triggered() {
+    QString file = QFileDialog::getOpenFileName(this, "Open Game", QDir::currentPath(), "Bingo File (*.bgo)");
+    if (file != "") {
+        game = Game(file, this);
+        this->setMaxNumbers(game.max_numbers);
+    }
+}
+
+void MainWindow::buttonToggled(bool t) {
+    for (int i = 0; i < buttons.size(); ++i) {
+        if (buttons[i]->isChecked() == state[i]) {
+            continue;
+        }
+        state[i] = t;
+        int number = i + 1;
+
+        if (t) {
+            numbers.push_front(QString("%1").arg(number));
+            emit lastNumberChanged();
+            emit oldNumbersChanged();
+
+            game.set(number);
+            ui->possibleWinners->clear();
+            ui->possibleWinners->addItems(game.getPossibleWinners());
+        } else {
+            numbers.removeOne(QString("%1").arg(number));
+            emit oldNumbersChanged();
+            emit lastNumberChanged();
+
+            game.unset(number);
+            ui->possibleWinners->clear();
+            ui->possibleWinners->addItems(game.getPossibleWinners());
+        }
+    }
+}
+
+
+void MainWindow::on_actionBingo_toggled(bool checked) {
     bingo = checked;
     img = "qrc:/imgs/imgs/bingo.png";
     emit bingoChanged();
     emit backImageChanged();
 }
 
-void MainWindow::on_countdownButton_toggled(bool checked)
-{
+void MainWindow::on_actionCountdown_toggled(bool checked) {
     countdown = checked;
     emit countdownChanged();
     if (checked) {
@@ -103,74 +181,10 @@ void MainWindow::on_countdownButton_toggled(bool checked)
     }
 }
 
-void MainWindow::on_wedgieButton_toggled(bool checked)
-{
+void MainWindow::on_actionWedgie_toggled(bool checked) {
     wedgie = checked;
     img = "qrc:/imgs/imgs/wedgie.png";
     emit wedgieChanged();
     emit backImageChanged();
-}
-
-void MainWindow::on_lineEdit_returnPressed()
-{
-    bool ok;
-    int number = ui->lineEdit->text().toInt(&ok);
-    if (number <= 75 && ok) {
-        ui->numberList->addItem(ui->lineEdit->text());
-        numbers.push_front(ui->lineEdit->text());
-        emit lastNumberChanged();
-        emit oldNumbersChanged();
-        ui->lineEdit->clear();
-
-        game.set(number);
-        ui->possibleWinners->clear();
-        ui->possibleWinners->addItems(game.getPossibleWinners());
-    }
-}
-
-void MainWindow::on_numberList_itemDoubleClicked(QListWidgetItem *item)
-{
-    int row = ui->numberList->row(item);
-    int number = ui->numberList->item(row)->text().toInt();
-    delete ui->numberList->takeItem(row);
-    numbers.removeAt(numbers.size()-row-1);
-    emit oldNumbersChanged();
-    emit lastNumberChanged();
-
-    game.unset(number);
-    ui->possibleWinners->clear();
-    ui->possibleWinners->addItems(game.getPossibleWinners());
-}
-
-void MainWindow::closeEvent(QCloseEvent *event) {
-    QSettings settings;
-    settings.setValue("mw-geometry", saveGeometry());
-    settings.setValue("mw-state", saveState());
-    settings.setValue("bw-geometry", bingoWindow->saveGeometry());
-    QMainWindow::closeEvent(event);
-}
-
-void MainWindow::on_actionNew_Game_triggered()
-{
-    Game *game = NewGameDialog::getGame(this);
-    if (game) {
-        this->game = *game;
-        delete game;
-    }
-}
-
-void MainWindow::on_actionOpen_Game_triggered()
-{
-    QString file = QFileDialog::getOpenFileName(this, "Open Game", QDir::currentPath(), "Bingo File (*.bgo)");
-    if (file != "") {
-        game = Game(file, this);
-    }
-}
-
-void MainWindow::ensure_Scrolled_Down(int min, int max)
-{
-    Q_UNUSED(min);
-    QScrollBar *sb = ui->numberList->verticalScrollBar();
-    sb->setValue(max);
 }
 
