@@ -1,4 +1,5 @@
 cmake_minimum_required(VERSION 2.6)
+project(bingo)
 
 add_subdirectory(3rdparty/qjson)
 
