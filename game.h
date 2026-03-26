@@ -5,17 +5,16 @@
 #include <QStringList>
 #include <QDir>
 #include <QVector>
-
-#include <boost/array.hpp>
+#include <array>
 
 struct Card {
-    boost::array<boost::array<int, 5>, 5> numbers;
+    std::array<std::array<int, 5>, 5> numbers;
     static Card random(int max_numbers);
 };
 
 struct Stencil {
     Stencil();
-    boost::array<boost::array<bool, 5>, 5> numbers;
+    std::array<std::array<bool, 5>, 5> numbers;
     void set(int number);
     QString getWin() const;
     bool isStar() const;

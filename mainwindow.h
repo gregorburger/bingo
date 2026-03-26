@@ -3,7 +3,7 @@
 
 #include <QMainWindow>
 #include <QTimer>
-#include <boost/array.hpp>
+#include <array>
 
 #include "game.h"
 
@@ -128,8 +128,8 @@ private:
 
     Game game;
 
-    boost::array<QPushButton *, 75> buttons;
-    boost::array<bool, 75> state;
+    std::array<QPushButton *, 75> buttons;
+    std::array<bool, 75> state;
 };
 
 #endif // MAINWINDOW_H

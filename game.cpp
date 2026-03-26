@@ -1,9 +1,9 @@
 #include "game.h"
 
-#include <boost/random/mersenne_twister.hpp>
-#include <boost/random/uniform_int.hpp>
-#include <boost/regex.hpp>
-#include <boost/lexical_cast.hpp>
+#include <random>
+#include <regex>
+#include <string>
+#include <ctime>
 
 #include <QSet>
 #include <QVariantMap>
@@ -106,35 +106,19 @@ void Game::saveGame(const QDir &dir, const QString &name) {
     f.close();
 }
 
-struct number_replacer {
-    const Card &c1, &c2;
-    number_replacer(const Card &c1, const Card &c2) : c1(c1), c2(c2) {
+std::string number_replacer(const std::smatch& what, const Card &c1, const Card &c2) {
+    int idx = std::stoi(what.str(1)) - 1;
+    if (idx < 25) {
+        return std::to_string(c1.numbers[idx%5][idx/5]);
+    }
+    idx -= 25;
+    return std::to_string(c2.numbers[idx%5][idx/5]);
+}
 
-    }
-
-    std::string operator()(boost::smatch what) {
-        int idx = boost::lexical_cast<int>(what.str(1)) - 1;
-        if (idx < 25) {
-            return boost::lexical_cast<std::string>(c1.numbers[idx%5][idx/5]);
-        }
-        idx -= 25;
-        return boost::lexical_cast<std::string>(c2.numbers[idx%5][idx/5]);
-    }
-};
-
-struct id_replacer {
-    std::string id1, id2;
-    
-    id_replacer(int id1, int id2) {
-        this->id1 = boost::lexical_cast<std::string>(id1);
-        this->id2 = boost::lexical_cast<std::string>(id2);
-    }
-    
-    std::string operator()(boost::smatch what) {
-        std::string num = what.str(1);
-        return num == "1" ? id1 : id2;
-    }
-};
+std::string id_replacer(const std::smatch& what, int id1, int id2) {
+    std::string num = what.str(1);
+    return num == "1" ? std::to_string(id1) : std::to_string(id2);
+}
 
 
 void Game::renderCards(const QDir &dir, const QString &name, QWidget *parent) {
@@ -156,8 +140,8 @@ void Game::renderCards(const QDir &dir, const QString &name, QWidget *parent) {
     dialog.setMaximum(cards.size()/2);
     dialog.setLabelText("Rendering Bingo Cards");
 
-    boost::regex number_re("%([0-9]+)");
-    boost::regex id_re("#id(1|2)");
+    std::regex number_re("%([0-9]+)");
+    std::regex id_re("#id(1|2)");
 
     for (int i = 0; i < cards.size()/2; i++) {
         qApp->processEvents();
@@ -168,24 +152,49 @@ void Game::renderCards(const QDir &dir, const QString &name, QWidget *parent) {
         Card c1 = cards[i*2];
         Card c2 = cards[i*2+1];
 
-        number_replacer fmter(c1, c2);
-        std::string svg_src = boost::regex_replace(_template, number_re, fmter);
-        id_replacer idter(i*2, i*2+1);
-        svg_src = boost::regex_replace(svg_src, id_re, idter);
+        // Replace numbers manually
+        std::string svg_src = _template;
+        std::string result;
+        auto numbers_begin = std::sregex_iterator(svg_src.begin(), svg_src.end(), number_re);
+        auto numbers_end = std::sregex_iterator();
+        size_t last_pos = 0;
 
-        QSvgRenderer renderer(QString::fromStdString(svg_src).toLatin1());
+        for (std::sregex_iterator it = numbers_begin; it != numbers_end; ++it) {
+            std::smatch match = *it;
+            result.append(svg_src, last_pos, match.position() - last_pos);
+            result.append(number_replacer(match, c1, c2));
+            last_pos = match.position() + match.length();
+        }
+        result.append(svg_src, last_pos, std::string::npos);
+        svg_src = result;
+
+        // Replace IDs manually
+        result.clear();
+        auto ids_begin = std::sregex_iterator(svg_src.begin(), svg_src.end(), id_re);
+        auto ids_end = std::sregex_iterator();
+        last_pos = 0;
+
+        for (std::sregex_iterator it = ids_begin; it != ids_end; ++it) {
+            std::smatch match = *it;
+            result.append(svg_src, last_pos, match.position() - last_pos);
+            result.append(id_replacer(match, i*2, i*2+1));
+            last_pos = match.position() + match.length();
+        }
+        result.append(svg_src, last_pos, std::string::npos);
+
+        QSvgRenderer renderer(QString::fromStdString(result).toLatin1());
         renderer.render(&painter);
         printer.newPage();
-        
+
     }
 
 }
 
-boost::random::mt19937 rng(std::time(0));
+std::mt19937 rng(std::time(0));
 
 
 Card Card::random(int max_numbers) {
-    boost::random::uniform_int_distribution<> gen(1, max_numbers);
+    std::uniform_int_distribution<> gen(1, max_numbers);
     Card card;
     int i = 0;
     QSet<int> card_numbers;

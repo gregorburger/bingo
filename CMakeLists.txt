@@ -9,14 +9,13 @@ set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTORCC ON)
 
 find_package(Qt6 REQUIRED COMPONENTS Core Widgets Svg Qml Quick QuickWidgets PrintSupport)
-find_package(Boost REQUIRED COMPONENTS regex)
 
 file(GLOB SRCS *.cpp)
 file(GLOB UI_FILES *.ui)
 
 add_executable(bingo ${SRCS} ${UI_FILES} bingo.qrc)
 
-target_include_directories(bingo PRIVATE ${CMAKE_CURRENT_BINARY_DIR} ${Boost_INCLUDE_DIR})
+target_include_directories(bingo PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
 
 target_link_libraries(bingo
     Qt6::Core
@@ -26,5 +25,4 @@ target_link_libraries(bingo
     Qt6::Quick
     Qt6::QuickWidgets
     Qt6::PrintSupport
-    ${Boost_REGEX_LIBRARY}
 )

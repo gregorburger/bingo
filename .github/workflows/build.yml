@@ -17,7 +17,7 @@ jobs:
       run: |
         sudo apt-get update
         sudo apt-get install -y qt6-base-dev qt6-declarative-dev qt6-svg-dev \
-          libqt6svg6-dev libgl1-mesa-dev libboost-regex-dev cmake ninja-build
+          libqt6svg6-dev libgl1-mesa-dev cmake ninja-build
 
     - name: Configure CMake
       run: |
@@ -53,12 +53,7 @@ jobs:
         mkdir -p $HOME/Qt
         aqt install-qt windows desktop 6.5.3 win64_mingw -O $HOME/Qt
 
-        # Download and extract Boost for MinGW
-        wget https://boostorg.jfrog.io/artifactory/main/release/1.83.0/source/boost_1_83_0.tar.gz
-        tar xzf boost_1_83_0.tar.gz
-
         echo "Qt6_DIR=$HOME/Qt/6.5.3/mingw_64" >> $GITHUB_ENV
-        echo "BOOST_ROOT=$PWD/boost_1_83_0" >> $GITHUB_ENV
 
     - name: Setup MinGW toolchain
       run: |
@@ -86,7 +81,6 @@ jobs:
           -DCMAKE_TOOLCHAIN_FILE=../toolchain.cmake \
           -DCMAKE_BUILD_TYPE=Release \
           -DQt6_DIR=$Qt6_DIR/lib/cmake/Qt6 \
-          -DBoost_INCLUDE_DIR=$BOOST_ROOT \
           ..
 
     - name: Build for Windows

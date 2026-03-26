@@ -38,7 +38,6 @@
           qt6.qtsvg
           qt6.qtdeclarative
           qt6.qttools
-          boost
         ];
 
         cmakeFlags = [
@@ -77,7 +76,6 @@
           pkgs.ninja
           pkgs.gcc
           pkgs.gdb
-          pkgs.boost
           pkgs.libGL
           pkgs.clazy
           #pkgs.qt6.wrapQtAppsHook
@@ -103,7 +101,6 @@
           qt6.qtsvg
           qt6.qtdeclarative
           qt6.qttools
-          boost
         ];
 
         shellHook = ''
