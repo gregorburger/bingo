@@ -51,8 +51,7 @@ jobs:
 
         # Install Qt6 for Windows with MinGW
         mkdir -p $HOME/Qt
-        aqt install-qt linux desktop 6.5.3 gcc_64 -O $HOME/Qt
-        aqt install-qt linux desktop 6.5.3 win64_mingw -O $HOME/Qt
+        aqt install-qt windows desktop 6.5.3 win64_mingw -m qtsvg qtdeclarative -O $HOME/Qt
 
         # Download and extract Boost for MinGW
         wget https://boostorg.jfrog.io/artifactory/main/release/1.83.0/source/boost_1_83_0.tar.gz
