@@ -49,7 +49,7 @@ jobs:
         # Install aqtinstall for Qt installation
         pip3 install aqtinstall
 
-        # Install Qt6 for Windows with MinGW
+        # Install Qt6 for Windows with MinGW (base includes most modules)
         mkdir -p $HOME/Qt
         aqt install-qt windows desktop 6.5.3 win64_mingw -m qtsvg qtdeclarative -O $HOME/Qt
 
