@@ -4,13 +4,14 @@
 
 #include <QFileDialog>
 #include <QCompleter>
-#include <QDirModel>
+#include <QFileSystemModel>
 
 NewGameDialog::NewGameDialog(QWidget *parent) :
     QDialog(parent),
     ui(new Ui::NewGameDialog) {
     ui->setupUi(this);
-    QDirModel *model = new QDirModel(this);
+    QFileSystemModel *model = new QFileSystemModel(this);
+    model->setRootPath("");
     QCompleter *completer = new QCompleter(model, this);
     ui->place->setCompleter(completer);
 }

@@ -17,8 +17,9 @@
 #include <QEventLoop>
 #include <QApplication>
 #include <QMessageBox>
-#include "qjson/src/serializer.h"
-#include "qjson/src/parser.h"
+#include <QJsonDocument>
+#include <QJsonObject>
+#include <QJsonArray>
 
 #include <iostream>
 using namespace std;
@@ -37,31 +38,27 @@ Game::Game(const QString &save_game, QWidget *parent) {
         return;
     }
     
-    QString contents = f.readAll();
-    QJson::Parser parser;
-    bool ok;
-    
-    QVariantMap bingo = parser.parse(contents.toAscii(), &ok).toMap();
-    if (!ok) {
-        QMessageBox::information(parent, "errer opening game file", "could not parse game file");
+    QByteArray contents = f.readAll();
+    QJsonParseError parseError;
+    QJsonDocument doc = QJsonDocument::fromJson(contents, &parseError);
+
+    if (parseError.error != QJsonParseError::NoError) {
+        QMessageBox::information(parent, "error opening game file", "could not parse game file: " + parseError.errorString());
         return;
     }
 
-    this->max_numbers = bingo["max_numbers"].toInt(&ok);
+    QJsonObject bingo = doc.object();
 
-    Q_ASSERT(ok);
+    this->max_numbers = bingo["max_numbers"].toInt();
 
-    QList<QVariant> cards = bingo["cards"].toList();
+    QJsonArray cards = bingo["cards"].toArray();
 
-    foreach(QVariant card, cards) {
+    for (const QJsonValue &cardValue : cards) {
         Card c;
-        Q_ASSERT(card.canConvert<QVariantList>());
+        QJsonArray cardNumbers = cardValue.toArray();
         int i = 0;
-        foreach(QVariant number, card.toList()) {
-            Q_ASSERT(number.canConvert<int>());
-            bool ok;
-            c.numbers[i%5][i/5] = number.toInt(&ok);
-            Q_ASSERT(ok);
+        for (const QJsonValue &numberValue : cardNumbers) {
+            c.numbers[i%5][i/5] = numberValue.toInt();
             i++;
         }
         this->cards.push_back(c);
@@ -87,25 +84,25 @@ QStringList Game::getPossibleWinners() const {
 }
 
 void Game::saveGame(const QDir &dir, const QString &name) {
-    QVariantMap bingo;
+    QJsonObject bingo;
 
     bingo["max_numbers"] = max_numbers;
 
-    QVariantList cards;
-    foreach(Card c, this->cards) {
-        QVariantList numbers;
+    QJsonArray cards;
+    for (const Card &c : this->cards) {
+        QJsonArray numbers;
         for (int i = 0; i < 5*5; i++) {
-            numbers.push_back(c.numbers[i%5][i/5]);
+            numbers.append(c.numbers[i%5][i/5]);
         }
-        cards.push_back(numbers);
+        cards.append(numbers);
     }
 
     bingo["cards"] = cards;
 
-    QJson::Serializer ser;
+    QJsonDocument doc(bingo);
     QFile f(dir.absoluteFilePath(name+".bgo"));
     f.open(QFile::WriteOnly);
-    f.write(ser.serialize(bingo));
+    f.write(doc.toJson());
     f.close();
 }
 
@@ -142,9 +139,9 @@ struct id_replacer {
 
 void Game::renderCards(const QDir &dir, const QString &name, QWidget *parent) {
     QPrinter printer;
-    printer.setPageSize(QPrinter::A4);
+    printer.setPageSize(QPageSize::A4);
     printer.setOutputFormat(QPrinter::PdfFormat);
-    printer.setOrientation(QPrinter::Landscape);
+    printer.setPageOrientation(QPageLayout::Landscape);
     printer.setOutputFileName(dir.absoluteFilePath(name+".pdf"));
     QPainter painter(&printer);
     
@@ -176,7 +173,7 @@ void Game::renderCards(const QDir &dir, const QString &name, QWidget *parent) {
         id_replacer idter(i*2, i*2+1);
         svg_src = boost::regex_replace(svg_src, id_re, idter);
 
-        QSvgRenderer renderer(QString::fromStdString(svg_src).toAscii());
+        QSvgRenderer renderer(QString::fromStdString(svg_src).toLatin1());
         renderer.render(&painter);
         printer.newPage();
         

@@ -1,4 +1,4 @@
-import QtQuick 1.0
+import QtQuick 2.15
 
 Rectangle {
     id: root_rectangle

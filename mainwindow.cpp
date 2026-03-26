@@ -7,10 +7,9 @@
 
 #include <QDebug>
 #include <QKeyEvent>
-#include <QDeclarativeContext>
-#include <QDeclarativeView>
+#include <QQmlContext>
+#include <QQuickWidget>
 #include <QVariant>
-#include <QGraphicsObject>
 #include <QSettings>
 #include <QFileDialog>
 #include <QScrollBar>
@@ -23,11 +22,11 @@ MainWindow::MainWindow(QWidget *parent) :
     bingoWindow = new BingoWindow(this);
     
     declarativeView = bingoWindow->ui->declarativeView;
-    
+
     context = declarativeView->rootContext();
     context->setContextProperty("mainwindow", this);
     context->setContextProperty("bingowindow", bingoWindow);
-   
+
     declarativeView->setSource(QUrl("qrc:/qml/mainview.qml"));
     addAction(ui->actionFullscreen);
     bingoWindow->addAction(ui->actionFullscreen);

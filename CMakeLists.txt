@@ -1,25 +1,30 @@
-cmake_minimum_required(VERSION 2.6)
+cmake_minimum_required(VERSION 3.16)
 project(bingo)
 
-add_subdirectory(3rdparty/qjson)
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-set(CMAKE_AUTOMOC TRUE)
+set(CMAKE_AUTOMOC ON)
+set(CMAKE_AUTOUIC ON)
+set(CMAKE_AUTORCC ON)
 
-find_package(Qt4 REQUIRED QtCore QtGui QtSvg QtDeclarative)
-include(${QT_USE_FILE})
-
+find_package(Qt6 REQUIRED COMPONENTS Core Widgets Svg Qml Quick QuickWidgets PrintSupport)
 find_package(Boost REQUIRED COMPONENTS regex)
 
 file(GLOB SRCS *.cpp)
 file(GLOB UI_FILES *.ui)
 
-qt4_wrap_ui(UI_SRCS ${UI_FILES})
-qt4_add_resources(RCSR_SRCS bingo.qrc)
+add_executable(bingo ${SRCS} ${UI_FILES} bingo.qrc)
 
+target_include_directories(bingo PRIVATE ${CMAKE_CURRENT_BINARY_DIR} ${Boost_INCLUDE_DIR})
 
-include_directories(${CMAKE_CURRENT_BINARY_DIR} 3rdparty ${Boost_INCLUDE_DIR})
-
-link_directories(${Boost_LIBRARY_DIRS})
-
-add_executable(bingo ${SRCS} ${UI_SRCS} ${RCSR_SRCS})
-target_link_libraries(bingo qjson ${QT_LIBRARIES} ${Boost_REGEX_LIBRARY})
+target_link_libraries(bingo
+    Qt6::Core
+    Qt6::Widgets
+    Qt6::Svg
+    Qt6::Qml
+    Qt6::Quick
+    Qt6::QuickWidgets
+    Qt6::PrintSupport
+    ${Boost_REGEX_LIBRARY}
+)

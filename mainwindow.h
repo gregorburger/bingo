@@ -11,8 +11,8 @@ namespace Ui {
 class MainWindow;
 }
 
-class QDeclarativeView;
-class QDeclarativeContext;
+class QQuickWidget;
+class QQmlContext;
 class QListWidgetItem;
 class BingoWindow;
 class QPushButton;
@@ -119,8 +119,8 @@ private:
     bool bingo, wedgie, countdown;
     
     QStringList numbers;
-    QDeclarativeView *declarativeView;
-    QDeclarativeContext *context;
+    QQuickWidget *declarativeView;
+    QQmlContext *context;
     
     int _countDown;
     QTimer countDownTimer;
