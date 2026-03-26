@@ -35,82 +35,56 @@ jobs:
         path: build/bingo
 
   build-windows:
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
     steps:
     - uses: actions/checkout@v4
 
-    - name: Install MinGW and dependencies
+    - name: Setup MSYS2
+      uses: msys2/setup-msys2@v2
+      with:
+        msystem: MINGW64
+        update: true
+        install: >-
+          mingw-w64-x86_64-gcc
+          mingw-w64-x86_64-cmake
+          mingw-w64-x86_64-ninja
+          mingw-w64-x86_64-qt6-base
+          mingw-w64-x86_64-qt6-svg
+          mingw-w64-x86_64-qt6-declarative
+          mingw-w64-x86_64-qt6-tools
+
+    - name: Configure CMake
+      shell: msys2 {0}
       run: |
-        sudo apt-get update
-        sudo apt-get install -y mingw-w64 cmake ninja-build wine64 wget unzip
+        mkdir build
+        cd build
+        cmake -G Ninja -DCMAKE_BUILD_TYPE=Release ..
 
-    - name: Download and setup Qt6 for MinGW
-      run: |
-        # Install aqtinstall for Qt installation
-        pip3 install aqtinstall
-
-        # Install Qt6 for Windows with MinGW (base includes most modules)
-        mkdir -p $HOME/Qt
-        aqt install-qt windows desktop 6.5.3 win64_mingw -O $HOME/Qt
-
-        echo "Qt6_DIR=$HOME/Qt/6.5.3/mingw_64" >> $GITHUB_ENV
-
-    - name: Setup MinGW toolchain
-      run: |
-        cat > toolchain.cmake << 'EOF'
-        set(CMAKE_SYSTEM_NAME Windows)
-        set(CMAKE_SYSTEM_PROCESSOR x86_64)
-
-        set(CMAKE_C_COMPILER x86_64-w64-mingw32-gcc)
-        set(CMAKE_CXX_COMPILER x86_64-w64-mingw32-g++)
-        set(CMAKE_RC_COMPILER x86_64-w64-mingw32-windres)
-
-        set(CMAKE_FIND_ROOT_PATH /usr/x86_64-w64-mingw32)
-        set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)
-        set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)
-        set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)
-
-        set(CMAKE_PREFIX_PATH "$ENV{Qt6_DIR}")
-        EOF
-
-    - name: Configure CMake for Windows
-      run: |
-        mkdir build-win
-        cd build-win
-        cmake -G Ninja \
-          -DCMAKE_TOOLCHAIN_FILE=../toolchain.cmake \
-          -DCMAKE_BUILD_TYPE=Release \
-          -DQt6_DIR=$Qt6_DIR/lib/cmake/Qt6 \
-          ..
-
-    - name: Build for Windows
-      run: cmake --build build-win
+    - name: Build
+      shell: msys2 {0}
+      run: cmake --build build
 
     - name: Package Windows build
+      shell: msys2 {0}
       run: |
         mkdir -p bingo-windows
-        cp build-win/bingo.exe bingo-windows/
+        cp build/bingo.exe bingo-windows/
 
         # Copy imgs folder
         cp -r imgs bingo-windows/
 
         # Copy Qt DLLs
-        cp $Qt6_DIR/bin/Qt6Core.dll bingo-windows/
-        cp $Qt6_DIR/bin/Qt6Gui.dll bingo-windows/
-        cp $Qt6_DIR/bin/Qt6Widgets.dll bingo-windows/
-        cp $Qt6_DIR/bin/Qt6Svg.dll bingo-windows/
-        cp $Qt6_DIR/bin/Qt6Qml.dll bingo-windows/
-        cp $Qt6_DIR/bin/Qt6Quick.dll bingo-windows/
-        cp $Qt6_DIR/bin/Qt6QuickWidgets.dll bingo-windows/
+        ldd build/bingo.exe | grep mingw64 | awk '{print $3}' | xargs -I{} cp {} bingo-windows/
 
         # Copy Qt plugins
         mkdir -p bingo-windows/platforms
-        cp $Qt6_DIR/plugins/platforms/qwindows.dll bingo-windows/platforms/
+        cp /mingw64/share/qt6/plugins/platforms/qwindows.dll bingo-windows/platforms/ || true
 
-        # Copy MinGW runtime
-        cp /usr/x86_64-w64-mingw32/lib/libwinpthread-1.dll bingo-windows/ || true
-        cp /usr/lib/gcc/x86_64-w64-mingw32/*/libstdc++-6.dll bingo-windows/ || true
-        cp /usr/lib/gcc/x86_64-w64-mingw32/*/libgcc_s_seh-1.dll bingo-windows/ || true
+        # Create qt.conf to help Qt find plugins
+        cat > bingo-windows/qt.conf << 'EOF'
+        [Paths]
+        Plugins = platforms
+        EOF
 
     - name: Upload Windows binary
       uses: actions/upload-artifact@v4
