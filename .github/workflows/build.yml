@@ -111,69 +111,38 @@ jobs:
     - name: Build
       run: cmake --build build
 
-    - name: Package macOS build
+    - name: Deploy Qt dependencies
       run: |
-        mkdir -p bingo-macos
-        cp build/bingo bingo-macos/
-        cp -r imgs bingo-macos/
+        "$(brew --prefix qt@6)/bin/macdeployqt" build/bingo.app -verbose=2
 
-        # Get Qt library path
-        QT_LIB_PATH="$(brew --prefix qt@6)/lib"
-        QT_PLUGINS_PATH="$(brew --prefix qt@6)/share/qt/plugins"
+    - name: Create DMG
+      run: |
+        cd build
+        cpack -G DragNDrop
 
-        # Copy Qt frameworks
-        mkdir -p bingo-macos/Frameworks
-        for framework in QtCore QtWidgets QtGui QtSvg QtQml QtQuick QtQuickWidgets QtPrintSupport QtDBus QtNetwork; do
-          if [ -d "$QT_LIB_PATH/$framework.framework" ]; then
-            echo "Copying $framework..."
-            cp -R "$QT_LIB_PATH/$framework.framework" bingo-macos/Frameworks/
-          else
-            echo "Warning: $framework not found"
-          fi
-        done
-
-        # Copy Qt plugins
-        mkdir -p bingo-macos/PlugIns/platforms
-        if [ -f "$QT_PLUGINS_PATH/platforms/libqcocoa.dylib" ]; then
-          cp "$QT_PLUGINS_PATH/platforms/libqcocoa.dylib" bingo-macos/PlugIns/platforms/
+    - name: Find and rename DMG
+      run: |
+        DMG_FILE=$(find build -name "*.dmg" -type f -not -path "*/build/_CPack_Packages/*" | head -n 1)
+        if [ -n "$DMG_FILE" ]; then
+          mv "$DMG_FILE" build/bingo-macos.dmg
+          echo "DMG created: build/bingo-macos.dmg"
+        else
+          echo "Error: No DMG file found"
+          exit 1
         fi
 
-        # Create qt.conf
-        cat > bingo-macos/qt.conf << 'EOF'
-        [Paths]
-        Plugins = PlugIns
-        EOF
-
-        # Fix library paths
-        cd bingo-macos
-        install_name_tool -add_rpath @executable_path/Frameworks ./bingo
-
-        # Update framework references in executable
-        for framework in QtCore QtWidgets QtGui QtSvg QtQml QtQuick QtQuickWidgets QtPrintSupport QtDBus QtNetwork; do
-          if [ -d "Frameworks/$framework.framework" ]; then
-            install_name_tool -change \
-              "$QT_LIB_PATH/$framework.framework/Versions/A/$framework" \
-              "@rpath/$framework.framework/Versions/A/$framework" \
-              ./bingo 2>/dev/null || true
-          fi
-        done
-
-        # Verify what was packaged
-        echo "=== Package contents ==="
-        ls -la
-        echo "=== Frameworks ==="
-        ls -la Frameworks/ || echo "No Frameworks directory"
-
-    - name: Upload macOS binary
+    - name: Upload macOS DMG
       uses: actions/upload-artifact@v4
       with:
         name: bingo-macos
-        path: bingo-macos/
+        path: build/bingo-macos.dmg
 
   create-release:
     needs: [build-linux, build-windows, build-macos]
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/master'
+    permissions:
+      contents: write
     steps:
     - name: Download all artifacts
       uses: actions/download-artifact@v4
@@ -182,13 +151,28 @@ jobs:
       run: |
         cd bingo-windows && zip -r ../bingo-windows.zip . && cd ..
         tar czf bingo-linux.tar.gz bingo-linux/
-        tar czf bingo-macos.tar.gz bingo-macos/
+        # macOS DMG is already ready, just rename it
+        mv bingo-macos/bingo-macos.dmg ./
 
-    - name: Upload release assets
-      uses: actions/upload-artifact@v4
+    - name: Get short commit SHA
+      id: sha
+      run: echo "short=$(echo ${{ github.sha }} | cut -c1-7)" >> $GITHUB_OUTPUT
+
+    - name: Create or update latest release
+      uses: softprops/action-gh-release@v1
       with:
-        name: release-packages
-        path: |
+        tag_name: latest
+        name: Latest Build
+        body: |
+          Automated build from commit ${{ steps.sha.outputs.short }}
+
+          **Built from**: `${{ github.ref_name }}`
+          **Commit**: ${{ github.sha }}
+          **Date**: ${{ github.event.head_commit.timestamp }}
+        files: |
           bingo-windows.zip
           bingo-linux.tar.gz
-          bingo-macos.tar.gz
+          bingo-macos.dmg
+        prerelease: false
+        draft: false
+        make_latest: true

@@ -26,3 +26,35 @@ target_link_libraries(bingo
     Qt6::QuickWidgets
     Qt6::PrintSupport
 )
+
+# Installation rules
+install(TARGETS bingo DESTINATION bin)
+install(DIRECTORY imgs DESTINATION bin)
+
+# macOS Bundle configuration
+if(APPLE)
+    set_target_properties(bingo PROPERTIES
+        MACOSX_BUNDLE TRUE
+        MACOSX_BUNDLE_GUI_IDENTIFIER com.bingo.app
+        MACOSX_BUNDLE_BUNDLE_NAME "Bingo"
+        MACOSX_BUNDLE_BUNDLE_VERSION "1.0"
+        MACOSX_BUNDLE_SHORT_VERSION_STRING "1.0"
+    )
+
+    # Install imgs into the bundle
+    set_source_files_properties(imgs PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
+endif()
+
+# CPack configuration for DMG
+set(CPACK_PACKAGE_NAME "Bingo")
+set(CPACK_PACKAGE_VENDOR "Bingo")
+set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "Bingo Application")
+set(CPACK_PACKAGE_VERSION "1.0.0")
+
+if(APPLE)
+    set(CPACK_GENERATOR "DragNDrop")
+    set(CPACK_DMG_VOLUME_NAME "Bingo")
+    set(CPACK_DMG_FORMAT "UDBZ")
+endif()
+
+include(CPack)
