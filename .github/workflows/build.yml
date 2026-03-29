@@ -115,26 +115,28 @@ jobs:
       run: |
         mkdir -p bingo-macos
         cp build/bingo bingo-macos/
-
-        # Copy imgs folder
         cp -r imgs bingo-macos/
-
-        # Copy Qt frameworks and fix paths
-        mkdir -p bingo-macos/Frameworks
 
         # Get Qt library path
         QT_LIB_PATH="$(brew --prefix qt@6)/lib"
+        QT_PLUGINS_PATH="$(brew --prefix qt@6)/share/qt/plugins"
 
-        # Copy required Qt frameworks
+        # Copy Qt frameworks
+        mkdir -p bingo-macos/Frameworks
         for framework in QtCore QtWidgets QtGui QtSvg QtQml QtQuick QtQuickWidgets QtPrintSupport QtDBus QtNetwork; do
           if [ -d "$QT_LIB_PATH/$framework.framework" ]; then
+            echo "Copying $framework..."
             cp -R "$QT_LIB_PATH/$framework.framework" bingo-macos/Frameworks/
+          else
+            echo "Warning: $framework not found"
           fi
         done
 
         # Copy Qt plugins
         mkdir -p bingo-macos/PlugIns/platforms
-        cp "$(brew --prefix qt@6)/share/qt/plugins/platforms/libqcocoa.dylib" bingo-macos/PlugIns/platforms/ || true
+        if [ -f "$QT_PLUGINS_PATH/platforms/libqcocoa.dylib" ]; then
+          cp "$QT_PLUGINS_PATH/platforms/libqcocoa.dylib" bingo-macos/PlugIns/platforms/
+        fi
 
         # Create qt.conf
         cat > bingo-macos/qt.conf << 'EOF'
@@ -142,13 +144,11 @@ jobs:
         Plugins = PlugIns
         EOF
 
-        # Fix library paths using install_name_tool
+        # Fix library paths
         cd bingo-macos
-
-        # Update the executable's rpath
         install_name_tool -add_rpath @executable_path/Frameworks ./bingo
 
-        # Update framework references in the executable
+        # Update framework references in executable
         for framework in QtCore QtWidgets QtGui QtSvg QtQml QtQuick QtQuickWidgets QtPrintSupport QtDBus QtNetwork; do
           if [ -d "Frameworks/$framework.framework" ]; then
             install_name_tool -change \
@@ -157,6 +157,12 @@ jobs:
               ./bingo 2>/dev/null || true
           fi
         done
+
+        # Verify what was packaged
+        echo "=== Package contents ==="
+        ls -la
+        echo "=== Frameworks ==="
+        ls -la Frameworks/ || echo "No Frameworks directory"
 
     - name: Upload macOS binary
       uses: actions/upload-artifact@v4
