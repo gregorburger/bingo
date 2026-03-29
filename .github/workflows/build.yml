@@ -92,8 +92,80 @@ jobs:
         name: bingo-windows
         path: bingo-windows/
 
+  build-macos:
+    runs-on: macos-latest
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Install Qt6
+      run: |
+        brew install qt@6 ninja
+
+    - name: Configure CMake
+      run: |
+        mkdir build
+        cd build
+        cmake -G Ninja -DCMAKE_BUILD_TYPE=Release \
+          -DCMAKE_PREFIX_PATH="$(brew --prefix qt@6)" ..
+
+    - name: Build
+      run: cmake --build build
+
+    - name: Package macOS build
+      run: |
+        mkdir -p bingo-macos
+        cp build/bingo bingo-macos/
+
+        # Copy imgs folder
+        cp -r imgs bingo-macos/
+
+        # Copy Qt frameworks and fix paths
+        mkdir -p bingo-macos/Frameworks
+
+        # Get Qt library path
+        QT_LIB_PATH="$(brew --prefix qt@6)/lib"
+
+        # Copy required Qt frameworks
+        for framework in QtCore QtWidgets QtGui QtSvg QtQml QtQuick QtQuickWidgets QtPrintSupport QtDBus QtNetwork; do
+          if [ -d "$QT_LIB_PATH/$framework.framework" ]; then
+            cp -R "$QT_LIB_PATH/$framework.framework" bingo-macos/Frameworks/
+          fi
+        done
+
+        # Copy Qt plugins
+        mkdir -p bingo-macos/PlugIns/platforms
+        cp "$(brew --prefix qt@6)/share/qt/plugins/platforms/libqcocoa.dylib" bingo-macos/PlugIns/platforms/ || true
+
+        # Create qt.conf
+        cat > bingo-macos/qt.conf << 'EOF'
+        [Paths]
+        Plugins = PlugIns
+        EOF
+
+        # Fix library paths using install_name_tool
+        cd bingo-macos
+
+        # Update the executable's rpath
+        install_name_tool -add_rpath @executable_path/Frameworks ./bingo
+
+        # Update framework references in the executable
+        for framework in QtCore QtWidgets QtGui QtSvg QtQml QtQuick QtQuickWidgets QtPrintSupport QtDBus QtNetwork; do
+          if [ -d "Frameworks/$framework.framework" ]; then
+            install_name_tool -change \
+              "$QT_LIB_PATH/$framework.framework/Versions/A/$framework" \
+              "@rpath/$framework.framework/Versions/A/$framework" \
+              ./bingo 2>/dev/null || true
+          fi
+        done
+
+    - name: Upload macOS binary
+      uses: actions/upload-artifact@v4
+      with:
+        name: bingo-macos
+        path: bingo-macos/
+
   create-release:
-    needs: [build-linux, build-windows]
+    needs: [build-linux, build-windows, build-macos]
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/master'
     steps:
@@ -104,6 +176,7 @@ jobs:
       run: |
         cd bingo-windows && zip -r ../bingo-windows.zip . && cd ..
         tar czf bingo-linux.tar.gz bingo-linux/
+        tar czf bingo-macos.tar.gz bingo-macos/
 
     - name: Upload release assets
       uses: actions/upload-artifact@v4
@@ -112,3 +185,4 @@ jobs:
         path: |
           bingo-windows.zip
           bingo-linux.tar.gz
+          bingo-macos.tar.gz
